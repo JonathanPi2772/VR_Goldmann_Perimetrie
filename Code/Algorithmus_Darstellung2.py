@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.animation import FuncAnimation
 
+from gl_implementation.helper_functions import calc_rotation_matrix
+
 
 # Funktionen für Berechnung
 def theta_from_regler(theta_regler):
@@ -16,18 +18,24 @@ def get_coordinates(laengengrad, theta_regler):
     theta = theta_from_regler(theta_regler)
     phi = np.deg2rad(laengengrad)
     x = sin(theta) * cos(phi)
-    y = -1 * cos(theta)
-    z = sin(theta) * sin(phi)
+    y = sin(theta) * sin(phi)
+    z = cos(theta)
     return x, y, z
+
+
+def transform_coordinates(a_vec, b_vec, c_vec):
+    R = calc_rotation_matrix(a_vec, b_vec)
+    return R @ c_vec
 
 
 def get_laengengrad_line(laengengrad):
     theta = np.linspace(np.pi / 2, np.pi, 100)
     phi = np.deg2rad(laengengrad)
     x = sin(theta) * cos(phi)
-    y = -1 * cos(theta)
-    z = sin(theta) * sin(phi)
+    y = sin(theta) * sin(phi)
+    z = cos(theta)
     return x, y, z
+
 
 if __name__ == "__main__":
     # Plot in neuem Fenster
@@ -95,12 +103,18 @@ if __name__ == "__main__":
         line.set_3d_properties(z_line)
 
         x_point, y_point, z_point = get_coordinates(degree, theta_regler)
+        a_vec = np.array([0, 0, -1], dtype=float)
+        b_vec = np.array([0, 1, -0], dtype=float)
+        c_vec = np.array([x_point, y_point, z_point], dtype=float)
+        x_point, y_point, z_point = transform_coordinates(a_vec, b_vec, c_vec)
         point.set_data([x_point], [y_point])
         point.set_3d_properties([z_point])
-        if frame % 100 == 0:
+        if frame % 10 == 0:
             r = np.sqrt(x_point ** 2 + y_point ** 2 + z_point ** 2)
             theta = math.acos(z_point / r) if r != 0 else 0
+            theta = -((theta / math.pi * 180) - 90)
             phi = np.arctan2(y_point, x_point)
+            phi = 90 - (phi / math.pi * 180)
             print(f"\r phi={phi} theta={theta} r={r}", end="")
 
         # optional: Legende
@@ -119,4 +133,3 @@ if __name__ == "__main__":
 
     plt.show()
     input("Beenden ? -- ")
-
