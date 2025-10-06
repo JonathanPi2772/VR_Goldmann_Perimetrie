@@ -1,0 +1,36 @@
+apply plugin: 'com.android.application'
+apply from: "$rootDir/gradle_common/build_base.gradle"
+apply from: "$rootDir/gradle_common/build_sdk.gradle"
+
+android {
+    defaultConfig {
+        applicationId "com.htc.vr.samples.wvr_hellovr"
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        debug {}
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    namespace 'com.htc.vr.samples.wvr_hellovr'
+
+    lintOptions {
+        disable "Instantiatable"
+    }
+    ndkVersion '28.2.13676358'
+}
+
+
+dependencies {
+    api 'com.htc.vr:wvr_client:+'
+}

@@ -1,0 +1,55 @@
+apply from: "$rootDir/gradle_common/build_base.gradle"
+def jniDir = "src/main/jni"
+def aarFilename = "wvr_client"
+
+android {
+    defaultConfig {
+        externalNativeBuild { ndkBuild {
+            def VR_SDK_ROOT = "${buildDir}/${aarFilename}"
+            arguments "VR_SDK_ROOT=$VR_SDK_ROOT"
+        }}
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "${jniDir}/Android.mk"
+        }
+    }
+
+    buildTypes {
+        release {
+            externalNativeBuild { ndkBuild {
+                arguments "NDK_DEBUG=0"
+            }}
+        }
+        debug {
+            externalNativeBuild { ndkBuild {
+                arguments "NDK_DEBUG=1"
+            }}
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.htc.vr:wvr_client:+'
+}
+
+// unzip aar
+afterEvaluate {
+    android.applicationVariants.all { variant ->
+        // The configuration is now variant-specific, e.g., 'debugRuntimeClasspath' or 'releaseRuntimeClasspath'
+        variant.runtimeConfiguration.resolvedConfiguration.resolvedArtifacts.find { it.name == aarFilename }?.with { aar ->
+            def unzipDir = file("${buildDir}/intermediates/unzipped-aar/${variant.name}")
+            copy {
+                println "unzipping '$aar' for variant '${variant.name}'"
+                from zipTree(aar.file)
+                into unzipDir
+            }
+            // You might need to adjust your VR_SDK_ROOT to point to this new location if the C++ build needs it
+        }
+    }
+}
+
