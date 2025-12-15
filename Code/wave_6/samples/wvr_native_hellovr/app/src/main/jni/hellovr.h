@@ -19,11 +19,19 @@
 #include <wvr/wvr_device.h>
 #include <wvr/wvr_events.h>
 #include <wvr/wvr_types.h>
+#include <wvr/wvr_eyetracking.h>
 #include <Sphere.h>
 #include <Floor.h>
+#include <Stars.h>
+#include <Terrain.h>
+#include <Sky.h>
+#include <Meteoroid.h>
+#include <chrono>
+
 
 #include "scene/DrawEnum.h"
 #include "scene/HandConstant.h"
+
 class Context;
 class HandManager;
 class Texture;
@@ -78,6 +86,13 @@ public:
     void updateHMDMatrixPose();
     void updateEyeToHeadMatrix(bool is6DoF);
 
+    // Methods for eye Tracking
+    bool initEyeTracking();
+    void shutdownEyeTracking();
+    void updateEyeTracking();
+    Vector3 calculateGazeFocusPoint();
+    //
+
     inline Matrix4 wvrmatrixConverter(const WVR_Matrix4f_t& mat) const {
         return Matrix4(
             mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
@@ -93,6 +108,11 @@ protected:
 
     Matrix4 mDevicePoseArray[WVR_DEVICE_COUNT_LEVEL_1];
     bool mShowDeviceArray[WVR_DEVICE_COUNT_LEVEL_1];
+
+    // For Eye-Tracking
+    bool mEyeTrackingEnabled;
+    WVR_EyeTracking_t mEyeTrackingData;
+    //
 
     int mControllerCount;
     int mControllerCount_Last;
@@ -137,7 +157,11 @@ protected:
     std::vector<FrameBufferObject*> mLeftEyeFBOMSAA;
     std::vector<FrameBufferObject*> mRightEyeFBOMSAA;
 
-    SkyBox * mSkyBox;
+    // SkyBox * mSkyBox;
+    Stars* mStars;
+    Sky* mSky;
+    Terrain* mTerrain;
+    Meteoroid* mMeteoroid;
     Picture * mGridPicture;
     ReticlePointer * mReticlePointer;
 
@@ -167,7 +191,7 @@ protected:
     bool mPointToSphere_R=false;
     Sphere::Color currColor=Sphere::Color::green;
     Sphere *mSphere;
-    Floor *mFloor;
+    // Floor *mFloor;
     Vector3 oriSpherePos;
     WVR_DeviceType mCurFocusController;
 

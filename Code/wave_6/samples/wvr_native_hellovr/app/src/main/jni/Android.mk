@@ -52,6 +52,11 @@ COMMON_FILES := \
     object/Object.cpp \
     object/Mesh.cpp \
     scene/SkyBox.cpp \
+    Settings.cpp\
+    scene/Stars.cpp \
+    scene/Sky.cpp \
+    scene/Meteoroid.cpp \
+    scene/Terrain.cpp \
     scene/ControllerAxes.cpp \
     scene/Picture.cpp \
     scene/ControllerCube.cpp \

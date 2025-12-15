@@ -33,6 +33,16 @@ private:
     Vector3 mTranslate;
     Vector3 mOriginalPos;
 
+    // Eye tracking related members
+    struct GazeHistoryEntry {
+        Vector3 position;
+        std::chrono::steady_clock::time_point timestamp;
+    };
+
+    std::queue<GazeHistoryEntry> mGazeHistory;
+    const float DELAY_SECONDS = 0.05f;
+    bool mFollowGaze;
+
 public:
     Sphere(Vector3& pos);
     ~Sphere() {}
@@ -41,12 +51,18 @@ public:
     {
         green = 0,
         red = 1,
-        blue = 2
+        blue = 2,
+        okay = 3
     };
 
     void setSphereColor(int color);
     void setSpherePos(Vector3& offset);
     Vector3 getCenter();
+
+    void addGazePosition(const Vector3& gazePos);
+    void updateSphereFromGaze();
+    void setFollowGaze(bool follow) { mFollowGaze = follow; }
+    bool isFollowingGaze() const { return mFollowGaze; }
 
 private:
     void initSphere();
@@ -54,6 +70,6 @@ private:
 
 public:
     virtual void draw(const Matrix4& projection, const Matrix4& eye, const Matrix4& view, const Vector4& lightDir);
-    float getRadius();
+    static float getRadius();
     };
 #endif //WVR_HELLOVR_SPHERE_H

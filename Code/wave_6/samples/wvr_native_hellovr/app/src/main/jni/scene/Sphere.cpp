@@ -12,6 +12,7 @@
 #include <Sphere.h>
 #include <Shader.h>
 #include <Object.h>
+#include <Settings.h>
 #include <VertexArrayObject.h>
 #include <GLES3/gl31.h>
 
@@ -23,15 +24,17 @@ namespace{
     const GLfloat red_color[3] = {0.678,0.231,0.129};
     const GLfloat green_color[3] = {0.0,1.0,0.0};
     const GLfloat blue_color[3] = {0.0,0.0,1.0};
-    const float r = 0.8f;
+    const GLfloat focus_point_color[3] = {0.7,0.7,0.7};
+    const float r = 0.15f;
     const float UNIT_SIZE=1.0f;
     const double
             PI=3.14159265358979323846264338327950288419716939937510582097494459230781640628;
     GLfloat lightLocation[3];
 }
 
-Sphere::Sphere(Vector3& pos) : Object(), mSphereDepth(20.0f) {
+Sphere::Sphere(Vector3& pos) : Object(), mSphereDepth(FOCUS_POINT_DISTANCE) {
     mName = LOG_TAG;
+    mFollowGaze = false;  // Initially disabled for Eye Tracking and movement
     loadShaderFromAsset("shader/vertex/sphere_vertex.glsl", "shader/fragment/sphere_fragment.glsl");
     if (mHasError)
         return;
@@ -139,29 +142,29 @@ void Sphere:: initVertexData(std::vector<float>& alVertix) {
     {
         for (int hAngle = 0; hAngle <= 360; hAngle = hAngle + angleSpan)
         {
-            float x0 = (float) (r * UNIT_SIZE
+            auto x0 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle)) * cos(toRadians(hAngle)));
-            float y0 = (float) (r * UNIT_SIZE
+            auto y0 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle)) * sin(toRadians(hAngle)));
-            float z0 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle)));
+            auto z0 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle)));
 
-            float x1 = (float) (r * UNIT_SIZE
+            auto x1 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle)) * cos(toRadians(hAngle + angleSpan)));
-            float y1 = (float) (r * UNIT_SIZE
+            auto y1 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle)) * sin(toRadians(hAngle + angleSpan)));
-            float z1 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle)));
+            auto z1 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle)));
 
-            float x2 = (float) (r * UNIT_SIZE
+            auto x2 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle + angleSpan)) * cos(toRadians(hAngle + angleSpan)));
-            float y2 = (float) (r * UNIT_SIZE
+            auto y2 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle + angleSpan)) * sin(toRadians(hAngle + angleSpan)));
-            float z2 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle + angleSpan)));
+            auto z2 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle + angleSpan)));
 
-            float x3 = (float) (r * UNIT_SIZE
+            auto x3 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle + angleSpan)) * cos(toRadians(hAngle)));
-            float y3 = (float) (r * UNIT_SIZE
+            auto y3 = (float) (r * UNIT_SIZE
                                 * cos(toRadians(vAngle + angleSpan)) * sin(toRadians(hAngle)));
-            float z3 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle + angleSpan)));
+            auto z3 = (float) (r * UNIT_SIZE * sin(toRadians(vAngle + angleSpan)));
 
             alVertix.push_back(x1);
             alVertix.push_back(y1);
@@ -251,7 +254,14 @@ void Sphere::draw(const Matrix4& projection, const Matrix4& eye, const Matrix4& 
         case blue:
             glUniform3f(mColor,blue_color[0],blue_color[1],blue_color[2]);
             break;
+        case okay:
+            glUniform3f(mColor,focus_point_color[0],focus_point_color[1], focus_point_color[2]);
     }
+
+
+    /*
+    glUniform3f(mColor,focus_point_color[0],focus_point_color[1],focus_point_color[2]);
+     */
     glDrawArrays(GL_TRIANGLES, 0, vCount);
     mShader->unuseProgram();
     mVAO->unbindVAO();
@@ -277,6 +287,51 @@ void Sphere::setSphereColor(int color) {
 void Sphere::setSpherePos(Vector3& offset) {
     mTranslate=offset;
 
+}
+
+void Sphere::addGazePosition(const Vector3& gazePos) {
+    if (!mFollowGaze) return;
+
+    GazeHistoryEntry entry;
+    entry.position = gazePos;
+    entry.timestamp = std::chrono::steady_clock::now();
+
+    mGazeHistory.push(entry);
+
+    // Clean up old entries (older than delay + 1 second buffer)
+    while (!mGazeHistory.empty()) {
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - mGazeHistory.front().timestamp
+        ).count() / 1000.0f;
+
+        if (age > DELAY_SECONDS + 1.0f) {
+            mGazeHistory.pop();
+        } else {
+            break;
+        }
+    }
+}
+
+void Sphere::updateSphereFromGaze() {
+    if (!mFollowGaze || mGazeHistory.empty()) return;
+
+    auto now = std::chrono::steady_clock::now();
+
+    // Find the gaze position that is approximately DELAY_SECONDS old
+    while (!mGazeHistory.empty()) {
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - mGazeHistory.front().timestamp
+        ).count() / 1000.0f;
+
+        if (age >= DELAY_SECONDS) {
+            Vector3 delayedGazePos = mGazeHistory.front().position;
+            setSpherePos(delayedGazePos);
+            mGazeHistory.pop();
+            break;
+        } else {
+            break;
+        }
+    }
 }
 
 

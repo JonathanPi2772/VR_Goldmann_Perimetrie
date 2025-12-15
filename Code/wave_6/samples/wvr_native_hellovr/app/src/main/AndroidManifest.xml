@@ -44,5 +44,8 @@
     </application>
     <uses-feature android:name="wave.feature.handtracking" android:required="true" />
     <uses-feature android:glEsVersion="0x00030000" />
+    <uses-feature
+        android:name="wave.feature.eyetracking"
+        android:required="true" />
 </manifest>
 

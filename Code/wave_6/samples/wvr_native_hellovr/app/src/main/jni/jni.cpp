@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
     LOGI("HelloVR main, start call app->initVR()");
     if (!app) return 1;
     if (!app->initVR()) {
+        std::cout << "HelloVR main, initVR fail,start call app->shutdownVR()";
         LOGW("HelloVR main, initVR fail,start call app->shutdownVR()");
         app->shutdownVR();
         delete app;
@@ -37,6 +38,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (!app->initGL()) {
+        std::cout << "HelloVR main, initGL failed, start call app->shutdownVR()";
         LOGW("HelloVR main, initGL failed, start call app->shutdownVR()");
         app->shutdownGL();
         app->shutdownVR();
@@ -49,6 +51,7 @@ int main(int argc, char *argv[]) {
             break;
 
         if (app->renderFrame()) {
+            std::cout << "Unknown render error. Quit.";
             LOGE("Unknown render error. Quit.");
             break;
         }
@@ -58,6 +61,7 @@ int main(int argc, char *argv[]) {
 
     app->shutdownGL();
     app->shutdownVR();
+    std::cout << "App Endet Normaly";
 
     delete app;
     return 0;
