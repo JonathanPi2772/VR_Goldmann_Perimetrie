@@ -105,6 +105,7 @@ MainApplication::MainApplication()
         , mIndexRight(0)
         , mLeftEyeQ(NULL)
         , mRightEyeQ(NULL)
+        , mShouldQuit(false)
         , mCurFocusController(WVR_DeviceType_HMD){
     // other initialization tasks are done in init
     memset(mDevClassChar, 0, sizeof(mDevClassChar));
@@ -115,6 +116,24 @@ MainApplication::MainApplication()
     // mFloor=NULL;
     mGridPicture = NULL;
     mReticlePointer = NULL;
+    mActiveEye=0; //0 for not started 1 for right, 2 for left
+    // Initialize Menu Panel
+    // Position: x=0, y=1.5 (eye level), z=-2.0 (2 meters in front)
+    // Size: Width=1.5m, Height=1.0m
+    mMenuHeight = 8.0;
+    mMenuWidth = 10.0;
+    mMenuPosition = Vector3(0.0f, 0.0f, -15.0f);
+    mStartMenu = NULL;
+    mLeftEyeMenu = NULL;
+    mRightEyeMenu = NULL;
+    mEndMenu = NULL;
+    mShowStartMenu = true;
+    mShowRightEyeMenu= false;
+    mShowLeftEyeMenu = false;
+    mShowEndMenu = false;
+    allDataSaved = false;
+
+
 #if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
     mControllerObjs[0] = nullptr;
     mControllerObjs[1] = nullptr;
@@ -218,6 +237,25 @@ bool MainApplication::initGL() {
     mSphere = new Sphere(oriSpherePos);
     OBJ_ERROR_CHECK(mSphere);
 
+    // Textboxes
+
+    // Start Menu
+    mStartMenu = new Panel(mMenuPosition, mMenuWidth, mMenuHeight);
+    mStartMenu->setTexture("textures/StartBox.png"); // Make sure this image exists!
+    mShowStartMenu = true; // Start with menu showing
+    // Right Eye
+    mRightEyeMenu = new Panel(mMenuPosition, mMenuWidth, mMenuHeight);
+    mRightEyeMenu->setTexture("textures/RightEyeBox.png");
+    mShowRightEyeMenu = false;
+    // Left Eye
+    mLeftEyeMenu = new Panel(mMenuPosition, mMenuWidth, mMenuHeight);
+    mLeftEyeMenu->setTexture("textures/LeftEyeBox.png");
+    mShowLeftEyeMenu = false;
+    // EndMenu
+    mEndMenu = new Panel(mMenuPosition, mMenuWidth, mMenuHeight);
+    mEndMenu->setTexture("textures/EndBox.png");
+    mShowEndMenu = false;
+
     // Setup Scenes
     mStars = new Stars(gDebug);
     OBJ_ERROR_CHECK(mStars);
@@ -225,10 +263,21 @@ bool MainApplication::initGL() {
     OBJ_ERROR_CHECK(mSky);
     mMeteoroid = new Meteoroid();
     OBJ_ERROR_CHECK(mMeteoroid);
-    mMeteoroid->start_animation();
+    // Todo: Has to be started, after the Textbox is gone
+    // mMeteoroid->start_animation();
     mTerrain = new Terrain(gDebug);
     OBJ_ERROR_CHECK(mTerrain);
     mLightDir = Vector4(0, 1, 0, 0);
+
+    // Set Balancing Eye
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    float rndNumber = dist(m_rng);
+    if (rndNumber < 0.5f) {
+        mFirstEye = 1;
+    } else {
+        mFirstEye = 2;
+    }
+
 
 
     // mGridPicture = new Picture();
@@ -496,6 +545,9 @@ void MainApplication::moveSphereHandler() {
 //-----------------------------------------------------------------------------
 bool MainApplication::handleInput() {
     LOGENTRY();
+    if (mShouldQuit) {
+        return true; // This breaks the loop in jni.cpp
+    }
     static ControllerState states[WVR_DEVICE_COUNT_LEVEL_1];
 
     bool resolutionChange = false;
@@ -537,38 +589,81 @@ bool MainApplication::handleInput() {
         mHandManager->handleHandTrackingMechanism();
 
         if (event.common.type == WVR_EventType_ButtonPressed) {
+            // Controller Right
+            if (
+                    (event.device.deviceType == WVR_DeviceType_Controller_Right) or
+                    (event.device.deviceType == WVR_DeviceType_Controller_Left)) {
+                if (
+                        (event.input.inputId == WVR_InputId_Alias1_Bumper) or
+                        (event.input.inputId == WVR_InputId_Alias1_Trigger) or
+                        (event.input.inputId == WVR_InputId_Alias1_Touchpad)
+                ) {
+                    if (mMeteoroid->m_perimetry_status == "running")
+                        mMeteoroid->point_detected();
+
+                    if (mShowRightEyeMenu) {
+                        mShowRightEyeMenu = false;
+                        mMeteoroid->start_animation();
+                        mActiveEye = 1;
+                    }
+
+                    if (mShowLeftEyeMenu) {
+                        mShowLeftEyeMenu = false;
+                        mMeteoroid->start_animation();
+                        mActiveEye = 2;
+                    }
+
+                    if (mShowStartMenu) {
+                        mShowStartMenu = false;
+                        if (mFirstEye == 1) {
+                            mShowRightEyeMenu = true;
+                        } else if (mFirstEye == 2) {
+                            mShowLeftEyeMenu = true;
+                        }
+                    }
+
+                    if (mShowEndMenu) {
+                        mShowEndMenu = false;
+                        mActiveEye = 0;
+                    }
+
+                }
+            // Controller Left
+            } /* else if (event.device.deviceType == WVR_DeviceType_Controller_Left) {
+                if (
+                        (event.input.inputId == WVR_InputId_Alias1_Bumper) or
+                        (event.input.inputId == WVR_InputId_Alias1_Trigger) or
+                        (event.input.inputId == WVR_InputId_Alias1_Touchpad)
+                        ) {
+                    mMeteoroid->point_detected();
+                }
+            }*/ /*
             // Todo: Change from Sphere Handler to press Button for detecting the point
             if (event.device.deviceType == WVR_DeviceType_Controller_Right
                 && event.input.inputId == WVR_InputId_Alias1_Bumper){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
             if (event.device.deviceType == WVR_DeviceType_Controller_Left
                 && event.input.inputId == WVR_InputId_Alias1_Bumper){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
 
             if (event.device.deviceType == WVR_DeviceType_Controller_Right
                 && event.input.inputId == WVR_InputId_Alias1_Trigger){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
             if (event.device.deviceType == WVR_DeviceType_Controller_Left
                 && event.input.inputId == WVR_InputId_Alias1_Trigger){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
 
             if (event.device.deviceType == WVR_DeviceType_Controller_Right
                 && event.input.inputId == WVR_InputId_Alias1_Touchpad){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
 
             if (event.device.deviceType == WVR_DeviceType_Controller_Left
                 && event.input.inputId == WVR_InputId_Alias1_Touchpad){
-                // moveSphereHandler();
                 mMeteoroid->point_detected();
             }
 
@@ -579,6 +674,7 @@ bool MainApplication::handleInput() {
                     LOGI("Eye tracking follow mode: %s", !currentState ? "ON" : "OFF");
                 }
             }
+            */
 
         }
     }
@@ -863,14 +959,14 @@ bool MainApplication::renderFrame() {
 
 
     updateEyeTracking();
-
+    /*
     //LOGD("renderFrame start");
     // for now as fast as possible
-    drawControllers();
+    drawControllers();m
 
     if (mInteractionMode == WVR_InteractionMode_Gaze) {
         drawReticlePointer();
-    }
+    }*/
     renderStereoTargets();
     ext |= WVR_SubmitExtend_Default;
 #if ENABLE_LOW_FOVEATED_RENDERING
@@ -1242,6 +1338,27 @@ void MainApplication::renderStereoTargets() {
 void MainApplication::renderScene(WVR_Eye nEye) {
     WVR_RenderMask(nEye);
 
+    // Reset for second eye
+    if (mMeteoroid and mMeteoroid->m_perimetry_status == "Done") {
+        if (mActiveEye == mFirstEye) {
+            savePerimetryData(mMeteoroid->m_goldmann_sheet);
+            mMeteoroid->reset_animation();
+            if (mFirstEye == 1) {
+                mActiveEye = 2;
+                mShowLeftEyeMenu = true;
+            } else if (mFirstEye == 2) {
+                mActiveEye = 1;
+                mShowRightEyeMenu = true;
+            }
+        } else {
+            if (!allDataSaved) {
+                savePerimetryData(mMeteoroid->m_goldmann_sheet);
+                allDataSaved = true;
+                mShowEndMenu = true;
+            }
+        }
+    }
+
     if (mGridPicture && mGridPicture->isEnabled()) {
         if (nEye == WVR_Eye_Left)
             mGridPicture->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
@@ -1249,6 +1366,32 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             mGridPicture->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
         return;
     }
+    // Menus
+    if (mStartMenu && mShowStartMenu) {
+        if (nEye == WVR_Eye_Left)
+            mStartMenu->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
+        else if (nEye == WVR_Eye_Right)
+            mStartMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
+    }
+    if (mRightEyeMenu && mShowRightEyeMenu) {
+        if (nEye == WVR_Eye_Left)
+            mRightEyeMenu->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
+        else if (nEye == WVR_Eye_Right)
+            mRightEyeMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
+    }
+    if (mLeftEyeMenu && mShowLeftEyeMenu) {
+        if (nEye == WVR_Eye_Left)
+            mLeftEyeMenu->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
+        else if (nEye == WVR_Eye_Right)
+            mLeftEyeMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
+    }
+    if (mEndMenu && mShowEndMenu) {
+        if (nEye == WVR_Eye_Left)
+            mEndMenu->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
+        else if (nEye == WVR_Eye_Right)
+            mEndMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
+    }
+
 
 
     // Sky
@@ -1261,13 +1404,11 @@ void MainApplication::renderScene(WVR_Eye nEye) {
 
     // Meteoroid
     if (mMeteoroid) {
-        if (nEye == WVR_Eye_Left)
+        if (nEye == WVR_Eye_Left and mActiveEye == 2)
             mMeteoroid->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
-        /*else if (nEye == WVR_Eye_Right)
+        else if (nEye == WVR_Eye_Right and mActiveEye == 1)
             mMeteoroid->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
-    */
-         }
-
+    }
     // Stars
     if (mStars and SHOW_STARS) {
         if (nEye == WVR_Eye_Left)
@@ -1428,7 +1569,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
     */
     // Sphere
     if (mSphere) {
-        mSphere->setSphereColor(currColor);
+    // mSphere->setSphereColor(currColor);
         if (nEye == WVR_Eye_Left)
             mSphere->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right)
@@ -1768,6 +1909,73 @@ Vector3 MainApplication::calculateGazeFocusPoint() {
     return focusPoint;
 }
 
+
+void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
+    if (mExportPath.empty()) {
+        LOGE("Cannot save data: Export path is empty.");
+        return;
+    }
+
+    // --- 1. Get Current Time ---
+    std::time_t t = std::time(nullptr);
+    std::tm* now = std::localtime(&t);
+
+    // --- 2. Format the Filename ---
+    // Format: perimetry_YYYY-MM-DD_HH-MM-SS.csv
+    char buffer[128];
+    std::strftime(buffer, sizeof(buffer), "perimetry_%Y-%m-%d_%H-%M-%S.csv", now);
+    std::string filename(buffer);
+
+    // --- 3. Construct Full Path ---
+    // Ensure mExportPath doesn't already have a trailing slash
+    std::string fullPath;
+    std::string eyeAppendix;
+    if (mActiveEye == 1) {
+        eyeAppendix = "Right_";
+    } else if (mActiveEye == 2) {
+        eyeAppendix = "Left_";
+    }
+    if (mExportPath.back() == '/') {
+        fullPath = mExportPath + eyeAppendix + filename;
+    } else {
+        fullPath = mExportPath + "/"+ eyeAppendix + filename;
+    }
+
+    LOGI("Saving data to: %s", fullPath.c_str());
+
+    // --- 4. Open and Write ---
+    std::ofstream outFile;
+    outFile.open(fullPath, std::ios::out); // Default to overwrite since filename is unique
+
+    if (!outFile.is_open()) {
+        LOGE("Failed to open file for writing: %s", fullPath.c_str());
+        return;
+    }
+
+    // Write CSV Header
+    outFile << "Theta,Phi,SizeIndex\n";
+
+    const auto& points = sheet.get_points();
+    const auto& sizes = sheet.get_sizes(); // Assuming you have sizes stored similarly
+
+    // Write Data
+    for (size_t i = 0; i < points.size(); ++i) {
+        // Safety check if sizes vector matches points vector
+        std::string sizeStr = (i < sizes.size() && sizes[i]) ? sizes[i]->get_name() : "Unknown Size";
+
+        outFile << points[i].theta << ","
+                << points[i].phi << ","
+                << sizeStr << "\n";
+    }
+
+    outFile.close();
+    LOGI("Data saved successfully with timestamp.");
+}
+
+void MainApplication::CloseApplication() {
+    LOGI("CloseApplication called. Exiting main loop...");
+    mShouldQuit = true;
+}
 
 #if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
 void MainApplication::setupControllers()

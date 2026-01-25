@@ -61,6 +61,7 @@ Meteoroid::Meteoroid()
     mViewMatrixHandle = mShader->getUniformLocation("view");
     mProjectionMatrixHandle = mShader->getUniformLocation("projection");
     mColorHandle = mShader->getUniformLocation("u_color");
+    m_perimetry_status = "Not Started";
 
     mVAO = new VertexArrayObject(true, false);
     GLenum err = glGetError();
@@ -283,10 +284,11 @@ void Meteoroid::resume_animation() {
     }
 }
 
-void Meteoroid::_reset_animation() {
+void Meteoroid::reset_animation() {
     m_current_longitude_start_time = std::chrono::time_point<std::chrono::high_resolution_clock>();
     m_current_longitude_index = 0;
     m_passed_seconds = 0.0;
+    m_perimetry_status = "Not Started";
 }
 
 void Meteoroid::star_position_changed(const Vector3& star_position) {
@@ -347,8 +349,7 @@ Meteoroid::CurrentPointInfo Meteoroid::get_current_point_info() {
             return get_current_point_info(); // Rekursiver Aufruf für den neuen Zustand
         } else {
             // Alle Größen fertig
-            _reset_animation();
-            m_perimetry_status = "done";
+            m_perimetry_status = "Done";
             return {false, {}, nullptr, {}};
         }
     }

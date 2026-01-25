@@ -61,6 +61,7 @@ COMMON_FILES := \
     scene/Picture.cpp \
     scene/ControllerCube.cpp \
     scene/Sphere.cpp \
+    scene/Panel.cpp \
     scene/Floor.cpp \
     scene/ReticlePointer.cpp \
     scene/Controller.cpp \

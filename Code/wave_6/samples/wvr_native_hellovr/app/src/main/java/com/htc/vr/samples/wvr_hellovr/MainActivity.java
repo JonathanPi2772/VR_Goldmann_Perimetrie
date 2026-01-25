@@ -34,8 +34,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import java.io.File;
+import android.os.Environment;
 
 public class MainActivity extends VRActivity {
+
+    // For sd storage writing
+    public native void setExportPath(String path);
     private static final String TAG = "wvr_hellovr";
 
     private static final String ACTION_SWITCH_DEBUG = "com.htc.vr.samples.wvr_hellovr.ACTION_SWITCH_DEBUG";
@@ -89,6 +94,38 @@ public class MainActivity extends VRActivity {
     protected void onCreate(Bundle icicle) {
         Log.i(TAG,"onCreate:call init");
         init(getResources().getAssets());
+
+        // For Writing to sd Card
+        // Request Permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+        }
+
+        // FIND SD CARD PATH
+        // getExternalFilesDirs returns an array:
+        // Index 0 = Internal Storage
+        // Index 1 = SD Card (if inserted)
+        File[] externalDirs = getExternalFilesDirs(null);
+        String sdCardPath = "";
+
+        if (externalDirs.length > 1 && externalDirs[1] != null) {
+            // We found an SD Card!
+            sdCardPath = externalDirs[1].getAbsolutePath();
+            Log.i(TAG, "SD Card Path found: " + sdCardPath);
+        } else {
+            // No SD Card, fallback to internal storage
+            if (externalDirs.length > 0 && externalDirs[0] != null) {
+                sdCardPath = externalDirs[0].getAbsolutePath();
+                Log.w(TAG, "No SD Card found, using internal storage.");
+            }
+        }
+
+        // Send this path to C++
+        setExportPath(sdCardPath);
+
+
         super.onCreate(icicle);
 
         // dump verion information

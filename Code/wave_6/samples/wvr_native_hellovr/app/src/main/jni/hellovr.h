@@ -10,6 +10,7 @@
 
 #pragma once
 #include <stdio.h>
+#include <fstream> // Required for file writing
 #include <string>
 #include <vector>
 
@@ -22,8 +23,10 @@
 #include <wvr/wvr_eyetracking.h>
 #include <Sphere.h>
 #include <Floor.h>
+#include <Panel.h>
 #include <Stars.h>
 #include <Terrain.h>
+#include <GoldmannSheet.h>
 #include <Sky.h>
 #include <Meteoroid.h>
 #include <chrono>
@@ -91,6 +94,10 @@ public:
     void shutdownEyeTracking();
     void updateEyeTracking();
     Vector3 calculateGazeFocusPoint();
+    // Write to SD Card
+    void setExportPath(std::string path) { mExportPath = path; }
+    void savePerimetryData(const GoldmannSheet& sheet);
+    void CloseApplication();
     //
 
     inline Matrix4 wvrmatrixConverter(const WVR_Matrix4f_t& mat) const {
@@ -102,6 +109,10 @@ public:
         );
     }
 
+private:
+    std::string mExportPath;
+    bool allDataSaved;
+    bool mShouldQuit;
 protected:
     void moveSphereHandler();
     WVR_DevicePosePair_t mVRDevicePairs[WVR_DEVICE_COUNT_LEVEL_1];
@@ -161,6 +172,20 @@ protected:
     Stars* mStars;
     Sky* mSky;
     Terrain* mTerrain;
+    Vector3 mMenuPosition;
+    float mMenuWidth;
+    float mMenuHeight;
+    Panel* mStartMenu;
+    bool mShowStartMenu;
+    Panel* mRightEyeMenu;
+    bool mShowRightEyeMenu;
+    Panel* mLeftEyeMenu;
+    bool mShowLeftEyeMenu;
+    Panel* mEndMenu;
+    bool mShowEndMenu;
+    std::mt19937 m_rng;
+    int mActiveEye;
+    int mFirstEye;
     Meteoroid* mMeteoroid;
     Picture * mGridPicture;
     ReticlePointer * mReticlePointer;

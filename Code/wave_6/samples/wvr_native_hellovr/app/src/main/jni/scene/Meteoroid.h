@@ -25,14 +25,20 @@ public:
     Meteoroid();
     virtual ~Meteoroid();
 
+    // Variablen
+    std::string m_perimetry_status;
+
     // Animationssteuerung
     void start_animation();
     void pause_animation();
     void resume_animation();
     void point_detected();
+    void reset_animation();
+
 
     // Position des "Fixsterns" / Thales-Punkts ändern
     void star_position_changed(const Vector3& star_position);
+    GoldmannSheet m_goldmann_sheet;
 
     // Die virtuelle Draw-Methode, die von der Engine aufgerufen wird
     virtual void draw(const Matrix4& projection, const Matrix4& eye, const Matrix4& view, const Vector4& lightDir);
@@ -51,8 +57,6 @@ private:
     VertexArrayObject* mVAO;
 
     // --- Logik-Member (aus meteoroid.py) ---
-    GoldmannSheet m_goldmann_sheet;
-    std::string m_perimetry_status;
 
     float m_radius;
     std::vector<double> m_longitudes_original;
@@ -94,7 +98,6 @@ private:
     CurrentPointInfo get_current_point_info();
 
     std::pair<glm::vec3, PolarPoint> _get_coordinates(double longitude, double theta_regler);
-    void _reset_animation();
     static double _theta_from_regler(double theta_regler) ;
     double _min_max_normalization(double value) const;
     std::shared_ptr<MeteoroideSize> get_next_valid_size(MeteoroidSizeID start_id);

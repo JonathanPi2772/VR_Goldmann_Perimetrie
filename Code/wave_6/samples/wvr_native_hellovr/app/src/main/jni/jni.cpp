@@ -23,10 +23,18 @@ extern bool gMsaa;
 extern bool gScene;
 extern bool gSceneOld;
 
+// --- 1. GLOBAL APP POINTER ---
+MainApplication *app = nullptr;
+std::string g_cachedPath = "";
+
 int main(int argc, char *argv[]) {
     LOGENTRY();
     LOGI("HelloVR main, new MainApplication ");
-    MainApplication *app = new MainApplication();
+    app = new MainApplication();
+    if (!g_cachedPath.empty()) {
+        LOGI("Main: Applying cached path to app: %s", g_cachedPath.c_str());
+        app->setExportPath(g_cachedPath);
+    }
     LOGI("HelloVR main, start call app->initVR()");
     if (!app) return 1;
     if (!app->initVR()) {
@@ -46,7 +54,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    while (1) {
+    while (true) {
         if (app->handleInput())
             break;
 
@@ -64,7 +72,36 @@ int main(int argc, char *argv[]) {
     std::cout << "App Endet Normaly";
 
     delete app;
+    app = nullptr;
     return 0;
+}
+
+// Add helper to convert Java string to C++ string
+std::string jstring2string(JNIEnv *env, jstring jStr) {
+    if (!jStr) return "";
+    const jclass stringClass = env->GetObjectClass(jStr);
+    const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+    const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
+    size_t length = (size_t) env->GetArrayLength(stringJbytes);
+    jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+    std::string ret = std::string((char *)pBytes, length);
+    env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+    env->DeleteLocalRef(stringJbytes);
+    env->DeleteLocalRef(stringClass);
+    return ret;
+}
+
+// Native function implementation
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_htc_vr_samples_wvr_1hellovr_MainActivity_setExportPath(JNIEnv *env, jobject instance, jstring path_) {
+    std::string path = jstring2string(env, path_);
+    g_cachedPath = path;
+    // Pass to your MainApplication instance (ensure 'app' is accessible here)
+    if (app != nullptr) {
+        app->setExportPath(path);
+        LOGI("JNI: Export path set to %s", path.c_str());
+    }
 }
 
 extern "C" {
