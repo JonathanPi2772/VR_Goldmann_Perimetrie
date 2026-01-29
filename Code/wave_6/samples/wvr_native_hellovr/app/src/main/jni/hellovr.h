@@ -30,16 +30,18 @@
 #include <Sky.h>
 #include <Meteoroid.h>
 #include <chrono>
+#include <Picture.h>
+#include "SkySphere.h"
 
 
-#include "scene/DrawEnum.h"
-#include "scene/HandConstant.h"
+//#include "scene/DrawEnum.h"
+//#include "scene/HandConstant.h"
 
 class Context;
-class HandManager;
-class Texture;
-class SkyBox;
-class SeaOfCubes;
+//class HandManager;
+//class Texture;
+//class SkyBox;
+//class SeaOfCubes;
 #if defined(USE_CONTROLLER)
 class Controller;
 #elif defined(USE_CUSTOM_CONTROLLER)
@@ -48,7 +50,7 @@ class CustomController;
 class ControllerAxes;
 class ControllerCube;
 #endif
-class ReticlePointer;
+//class ReticlePointer;
 class FrameBufferObject;
 class Picture;
 class Clock;
@@ -78,11 +80,11 @@ public:
     void processVREvent(const WVR_Event_t & event);
     bool renderFrame();
 
-    void handleHandInput(HandTypeEnum handType);
-    void calculateHandInteraction(DrawModeEnum iMode, size_t iEyeID);
+    //void handleHandInput(HandTypeEnum handType);
+    //void calculateHandInteraction(DrawModeEnum iMode, size_t iEyeID);
 
     void renderStereoTargets();
-    void drawControllers();
+    //void drawControllers();
     void renderScene(WVR_Eye nEye);
 
     void updateTime();
@@ -93,7 +95,6 @@ public:
     bool initEyeTracking();
     void shutdownEyeTracking();
     void updateEyeTracking();
-    Vector3 calculateGazeFocusPoint();
     // Write to SD Card
     void setExportPath(std::string path) { mExportPath = path; }
     void savePerimetryData(const GoldmannSheet& sheet);
@@ -114,7 +115,7 @@ private:
     bool allDataSaved;
     bool mShouldQuit;
 protected:
-    void moveSphereHandler();
+    //void moveSphereHandler();
     WVR_DevicePosePair_t mVRDevicePairs[WVR_DEVICE_COUNT_LEVEL_1];
 
     Matrix4 mDevicePoseArray[WVR_DEVICE_COUNT_LEVEL_1];
@@ -183,12 +184,19 @@ protected:
     bool mShowLeftEyeMenu;
     Panel* mEndMenu;
     bool mShowEndMenu;
-    std::mt19937 m_rng;
+
+
+    bool realPausedReleased;
+    SkySphere* mPauseMenu;
+    bool mShowPauseMenu;
+    std::chrono::time_point<std::chrono::high_resolution_clock> mPausedReleased;
+
+    std::mt19937 m_rng{ std::random_device{}() };
     int mActiveEye;
     int mFirstEye;
     Meteoroid* mMeteoroid;
     Picture * mGridPicture;
-    ReticlePointer * mReticlePointer;
+    //ReticlePointer * mReticlePointer;
 
     Matrix4 mWorldTranslation;  // a little backward and upper to avoid been in a cube.
     float mWorldRotation;  // a little backward and upper to avoid been in a cube.
@@ -229,5 +237,5 @@ protected:
 
     void drawReticlePointer();
     void switchResolution();
-    HandManager *mHandManager;
+    //HandManager *mHandManager;
 };

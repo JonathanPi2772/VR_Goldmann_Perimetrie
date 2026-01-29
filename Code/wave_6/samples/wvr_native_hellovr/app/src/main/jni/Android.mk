@@ -51,26 +51,19 @@ COMMON_FILES := \
     object/Shader.cpp \
     object/Object.cpp \
     object/Mesh.cpp \
-    scene/SkyBox.cpp \
     Settings.cpp\
     scene/Stars.cpp \
     scene/Sky.cpp \
+    scene/GoldmannSizes.cpp \
     scene/Meteoroid.cpp \
     scene/Terrain.cpp \
-    scene/ControllerAxes.cpp \
+    scene/SkySphere.cpp \
     scene/Picture.cpp \
-    scene/ControllerCube.cpp \
     scene/Sphere.cpp \
     scene/Panel.cpp \
     scene/Floor.cpp \
     scene/ReticlePointer.cpp \
     scene/Controller.cpp \
-    scene/CustomController.cpp \
-    scene/HandManager.cpp \
-    scene/HandModel.cpp \
-    scene/HandObj.cpp \
-    scene/Axes.cpp \
-    scene/FocusRay.cpp \
     scene/FocusPoint.cpp
 
 #USE_CONTROLLER use device controller.

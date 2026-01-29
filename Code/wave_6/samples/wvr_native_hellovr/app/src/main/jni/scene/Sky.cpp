@@ -27,6 +27,7 @@ Sky::Sky(bool debug) : Object() {
     // 2. Hole die Speicherorte der Uniform-Variablen aus dem Shader.
     mProjectionMatrixLocation = mShader->getUniformLocation("uProjectionMatrix");
     mModelViewMatrixLocation = mShader->getUniformLocation("uModelViewMatrix");
+    mColorLocation = mShader->getUniformLocation("uSkyColor");
 
 
     // 3. Erstelle das VertexArrayObject, das in der Object-Klasse gespeichert wird.
@@ -116,8 +117,14 @@ void Sky::draw(const Matrix4& projection, const Matrix4& eye, const Matrix4& vie
     viewMatrixForSky[14] = 0;
     Matrix4 modelViewMatrix = eye * viewMatrixForSky;
 
+    float ratio = BACKGROUND_LUMINANCE_NITS / MAX_HEADSET_LUMINANCE_NITS;
+
+    // 2. Apply Gamma Correction: 0.066 ^ (1/2.2) = ~0.29
+    float gammaEncoded = std::pow(ratio, 1.0f / 2.2f);
+
     // === 1. Himmelskugel zeichnen ===
     mShader->useProgram();
+    glUniform3f(mColorLocation, gammaEncoded, gammaEncoded, gammaEncoded);
     glUniformMatrix4fv(mProjectionMatrixLocation, 1, GL_FALSE, projection.get());
     glUniformMatrix4fv(mModelViewMatrixLocation, 1, GL_FALSE, modelViewMatrix.get());
 

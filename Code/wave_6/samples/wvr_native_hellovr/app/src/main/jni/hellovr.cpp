@@ -269,7 +269,7 @@ bool MainApplication::initGL() {
 
     // Pause Menu
     mPauseMenu = new SkySphere();
-    mPauseMenu->setTexture("textures/PauseMenu.png");
+    mPauseMenu->setTexture("textures/PauseMenu2.png");
     mShowPauseMenu = false;
     realPausedReleased = false;
     mPausedReleased = std::chrono::high_resolution_clock::now();
@@ -445,6 +445,10 @@ void MainApplication::shutdownGL() {
     if (mTerrain != NULL)
         delete mTerrain;
     mTerrain = NULL;
+
+    if (mPauseMenu != NULL)
+        delete mPauseMenu;
+    mPauseMenu = NULL;
 
     if (mGridPicture != NULL)
         delete mGridPicture;
@@ -629,8 +633,9 @@ bool MainApplication::handleInput() {
                         CloseApplication();
                     }
                 // If A or X Button is Pressed
-                } else if ((event.input.inputId == WVR_InputId_Alias1_A) or
-                           (event.input.inputId == WVR_InputId_Alias1_X)) {
+                } else if (((event.input.inputId == WVR_InputId_Alias1_A) or
+                           (event.input.inputId == WVR_InputId_Alias1_X))
+                           and !mShowStartMenu and !mShowRightEyeMenu and !mShowLeftEyeMenu and !mShowEndMenu) {
                     if (mShowPauseMenu) {
                         realPausedReleased = true;
                         mShowPauseMenu = false;
@@ -1100,12 +1105,13 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             mShowPauseMenu = false;
             mPausedReleased = now;
             mMeteoroid->resume_animation();
+        }
     }
 
 
 
     // Sky
-    if (mSky) {
+    if (mSky and !mShowPauseMenu) {
         if (nEye == WVR_Eye_Left)
             mSky->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right)
@@ -1120,7 +1126,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             mMeteoroid->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
     }
     // Stars
-    if (mStars and SHOW_STARS) {
+    if (mStars and SHOW_STARS and !mShowPauseMenu) {
         if (nEye == WVR_Eye_Left)
             mStars->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right)
@@ -1128,7 +1134,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
     }
 
     // Terrain
-    if (mTerrain and SHOW_TERRAIN) {
+    if (mTerrain and SHOW_TERRAIN and !mShowPauseMenu) {
         if (nEye == WVR_Eye_Left)
             mTerrain->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right)
@@ -1403,14 +1409,14 @@ void MainApplication::updateEyeTracking() {
             // --- STATE: LOOKING AT SPHERE ---
             mSphere->setSphereColor(Sphere::Color::green); // Renders as Grey/White
 
-            if (mMeteoroid) {
+            if (mMeteoroid and !realPausedReleased) {
                 mMeteoroid->resume_animation();
             }
         } else {
             // --- STATE: LOOKING AWAY ---
             mSphere->setSphereColor(Sphere::Color::red);   // Renders as Red
 
-            if (mMeteoroid) {
+            if (mMeteoroid and !realPausedReleased) {
                 mMeteoroid->pause_animation(false);
             }
         }

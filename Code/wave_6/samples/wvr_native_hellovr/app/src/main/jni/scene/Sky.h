@@ -16,6 +16,7 @@ private:
 
     GLint mProjectionMatrixLocation;
     GLint mModelViewMatrixLocation ;
+    GLint mColorLocation;
 
 public:
     Sky(bool debug);

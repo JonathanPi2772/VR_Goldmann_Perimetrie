@@ -14,6 +14,7 @@
 #include <GLES3/gl31.h>
 #include <glm/gtc/type_ptr.hpp> // Für glm::value_ptr
 #include <math.h>
+#include "GoldmannSheet.h"
 
 // --- Implementierung ---
 
@@ -37,16 +38,13 @@ Meteoroid::Meteoroid()
     m_paused_star_position = glm::vec3(0.0f, 0.0f, -m_radius);
     m_paused_star_p = {0.0, 0.0};
 
-    // Map für einfachen Zugriff auf die Größen-Objekte
-    m_size_map = {
-            {MeteoroidSizeID::I, std::make_shared<Size_I>()},
-            {MeteoroidSizeID::II, std::make_shared<Size_II>()},
-            {MeteoroidSizeID::III, std::make_shared<Size_III>()},
-            {MeteoroidSizeID::IV, std::make_shared<Size_IV>()},
-            {MeteoroidSizeID::V, std::make_shared<Size_V>()}
-    };
+    m_goldmann_sheet = GoldmannSheet();
+    m_goldmann_sheet.setup_sheet(METEOROID_LONGITUDES_DEG, LUMINANCE_TO_USE, 1);
+    m_goldmann_sheet.setup_sheet(METEOROID_LONGITUDES_DEG, LUMINANCE_TO_USE, 2);
+
+
     m_current_size = m_size_map.at(MeteoroidSizeID::V); // Standard
-    m_paused_star_size = m_size_map.at(MeteoroidSizeID::I);
+    m_paused_star_size = m_size_map.at(MeteoroidSizeID::None);
 
     // --- OpenGL-Initialisierung (parallel zu Sphere.cpp) ---
 
@@ -62,6 +60,7 @@ Meteoroid::Meteoroid()
     mProjectionMatrixHandle = mShader->getUniformLocation("projection");
     mColorHandle = mShader->getUniformLocation("u_color");
     m_perimetry_status = "Not Started";
+    mActiveEye = 0;
 
     mVAO = new VertexArrayObject(true, false);
     GLenum err = glGetError();
@@ -77,7 +76,7 @@ Meteoroid::~Meteoroid() {
 
 // 1:1-Kopie von Sphere::initVertexData
 void Meteoroid::initVertexData(std::vector<float>& alVertix) {
-    const float r = 0.8f; // Wir verwenden einen Normal-Radius, Skalierung erfolgt im Shader
+    const float r = 1.0f; // Wir verwenden einen Normal-Radius, Skalierung erfolgt im Shader // was 0.8f
     const float UNIT_SIZE = 1.0f;
     auto toRadians = [](double vAngle) { return vAngle * M_PI / 180.0; };
 
@@ -161,21 +160,24 @@ void Meteoroid::initMeteoroidSphere() {
 }
 
 
+
 void Meteoroid::draw(const Matrix4& projection, const Matrix4& eye, const Matrix4& view, const Vector4& lightDir) {
     if (!mEnable || mHasError || !mVAO) {
         return;
     }
 
     // 1. Logik-Update (bleibt in glm)
-    CurrentPointInfo info = get_current_point_info();
+    CurrentPointInfo info = get_current_point_info(false);
     if (!info.is_visible) {
         return;
     }
 
     // 2. Skalierungsfaktor berechnen (bleibt in glm)
-    double area = info.size->get_size_meter_sq();
-    float radius_m = static_cast<float>(std::sqrt(area / M_PI));
-    float scale_factor = radius_m / 0.8f; // 0.8f = Basis-Radius aus initVertexData
+    double area = std::visit([](auto&& s) {
+        return s.get_size_meter_sq();
+    }, info.size);
+    float radius_m = static_cast<float>(std::sqrt(area / M_PI)); // A= pi*r^2 -> r = sqrt(A/pi)
+    float scale_factor = radius_m; // was dived through 0.8f = from ealrier Basis-Radius aus initVertexData
 
     // 3. Model-Matrix mit GLM bauen (unsere interne Logik)
     glm::mat4 model_matrix_glm = glm::mat4(1.0f);
@@ -205,8 +207,6 @@ void Meteoroid::draw(const Matrix4& projection, const Matrix4& eye, const Matrix
     // 7. Uniforms senden
     // Wir verwenden die .get() Methode, die in Sphere.cpp für
     // die Übergabe an glUniformMatrix4fv genutzt wird.
-    //glUniformMatrix4fv(mModelMatrixHandle, 1, GL_FALSE, model_matrix_engine.get());
-    //glUniformMatrix4fv(mModelviewProjectionLocation, 1, GL_FALSE, modelview_projection.get());
     glUniformMatrix4fv(mModelMatrixHandle, 1, GL_FALSE, model_matrix_engine.get());
     glUniformMatrix4fv(mViewMatrixHandle, 1, GL_FALSE, final_view_matrix.get());
     glUniformMatrix4fv(mProjectionMatrixHandle, 1, GL_FALSE, projection.get());
@@ -217,13 +217,14 @@ void Meteoroid::draw(const Matrix4& projection, const Matrix4& eye, const Matrix
 
 
     // 8. Farbe senden
-    float target_db = TARGET_LUMINANCE_DB;
-    float color_value = static_cast<float>(std::pow(10.0, target_db / 10.0));
+    std::string target_luminance_id = m_longitudes[m_current_longitude_index].luminance;
+    std::vector<float> luminance = std::visit([&target_luminance_id](auto&& s) {
+        return s.GetGoldmannColor(target_luminance_id, BACKGROUND_LUMINANCE_NITS, MAX_HEADSET_LUMINANCE_NITS);
+    }, m_current_size);
     glUniform3f(mColorHandle,
-                color_value,
-                color_value,
-                color_value);
-
+                luminance[0],
+                luminance[1],
+                luminance[2]);
     // 9. Zeichnen
     glDrawArrays(GL_TRIANGLES, 0, vCount);
 
@@ -234,28 +235,49 @@ void Meteoroid::draw(const Matrix4& projection, const Matrix4& eye, const Matrix
 
 // --- Logik-Funktionen (übersetzt aus meteoroid.py) ---
 
+void Meteoroid::setup_longitudes() {
+    vector<PerimetryVector> new_longitudes = {};
+    std::vector<MeteoroidSizeID> sizes = {MeteoroidSizeID::V, MeteoroidSizeID::IV, MeteoroidSizeID::III, MeteoroidSizeID::II, MeteoroidSizeID::I};
+    for (auto size : sizes) {
+        std::vector<string> lum_to_use = LUMINANCE_TO_USE.at(size);
+        for (auto lum : lum_to_use) {
+            for (int iterations = 0; iterations < NUMBER_ITERATIONS_PER_SIZE; iterations++) {
+                vector<PerimetryVector> shuffled_l = METEOROID_LONGITUDES_DEG;
+                if (METEOROID_RANDOM) {
+                    std::shuffle(shuffled_l.begin(), shuffled_l.end(), m_rng);
+                }
+                for (auto& longitude : shuffled_l) {
+                    longitude.luminance = lum;
+                    longitude.size= size;
+                }
+                new_longitudes.insert(new_longitudes.end(), shuffled_l.begin(), shuffled_l.end());
+            }
+        }
+    }
+    m_longitudes = new_longitudes;
+}
+
 void Meteoroid::start_animation() {
+    setup_longitudes();
+    /*
     if (METEOROID_RANDOM) {
         std::shuffle(m_longitudes.begin(), m_longitudes.end(), m_rng);
-    }
+    }*/
     m_current_longitude_start_time = std::chrono::high_resolution_clock::now();
     m_current_longitude_index = 0;
 
     // Finde die erste gültige Größe
-    m_current_size = get_next_valid_size(MeteoroidSizeID::V);
-    if (m_current_size == nullptr) {
-        mHasError = true;
-        return;
-        "Perimetry can not be started with no Size in settings set to true";
-    }
-    m_current_size->set_distance(m_radius);
+    m_current_size = m_size_map.at(m_longitudes[m_current_longitude_index].size);//get_next_valid_size(MeteoroidSizeID::V);
+    std::visit([this](auto&& s) {
+        s.set_distance(m_radius);
+    }, m_current_size);
 
     m_perimetry_status = "running";
 }
 
-void Meteoroid::pause_animation() {
+void Meteoroid::pause_animation(bool point_detected) {
     if (m_perimetry_status == "running") {
-        CurrentPointInfo info = get_current_point_info();
+        CurrentPointInfo info = get_current_point_info(point_detected);
         m_paused_star_position = info.position;
         m_paused_star_size = info.size;
         m_paused_star_p = info.p;
@@ -291,87 +313,187 @@ void Meteoroid::reset_animation() {
     m_perimetry_status = "Not Started";
 }
 
-void Meteoroid::star_position_changed(const Vector3& star_position) {
+/*void Meteoroid::star_position_changed(const Vector3& star_position) {
     m_R = calc_rotation_matrix(GENERAL_THALES_POINT_VEC, star_position);
-}
+}*/
 
-// Helfer zum Finden der nächsten zu testenden Größe
-std::shared_ptr<MeteoroideSize> Meteoroid::get_next_valid_size(MeteoroidSizeID start_id) {
-    MeteoroidSizeID current_id = start_id;
-    while (current_id != MeteoroidSizeID::None) {
-        // Prüfen, ob die Größe in den Settings auf 'true' steht
-        if (METEOROID_SIZES.count(current_id) && METEOROID_SIZES.at(current_id)) {
-            return m_size_map.at(current_id);
-        }
-        // Nächste Größe holen und Schleife fortsetzen
-        current_id = m_size_map.at(current_id)->get_next_size_id();
+
+
+double Meteoroid::calculate_adaptive_speed(double current_r, double normative_r) {
+
+    double v_slow = std::visit([](auto&& s) {
+        return s.get_speed();
+    }, m_current_size);
+    double sigma = 15.0;  // How "wide" the slow-down zone is
+    double v_fast = 25.0; // e.g., 5 degrees per second
+
+    // Rule: If we have passed the mean (current_r > normative_r),
+    // do not speed up again. Stay at precision speed.
+    if (current_r > (90-normative_r)) {
+        return v_slow;
     }
-    return nullptr; // Keine gültige Größe mehr gefunden
+
+    // Gaussian Brake: Slow down as we get closer to normative_r
+    double distance = std::abs((90-current_r) - normative_r);
+
+    // Gaussian formula: v_fast - (diff) * exp(...)
+    //double speed = v_fast - (v_fast - v_slow) * std::exp(-(distance * distance) / (2 * sigma * sigma));
+
+    //return speed;
+    double safety_margin_deg = 15.0;
+
+    if (distance <= safety_margin_deg) {
+        return v_slow; // Within the danger zone, go slow.
+    } else {
+        // Linear ramp up between Safety Margin (15°) and Full Speed (at 30°+)
+        // This is smoother than an abrupt jump but faster than Gaussian
+        double ramp_length = 15.0; // Takes 15 degrees to accelerate fully
+        double factor = (distance - safety_margin_deg) / ramp_length;
+
+        // Clamp factor 0.0 to 1.0
+        if (factor > 1.0) factor = 1.0;
+
+        // Lerp (Linear Interpolation)
+        return v_slow + factor * (v_fast - v_slow);
+    }
 }
 
-
-Meteoroid::CurrentPointInfo Meteoroid::get_current_point_info() {
+Meteoroid::CurrentPointInfo Meteoroid::get_current_point_info(bool point_detected) {
+    // 1. Handle Paused State
     if (m_perimetry_status == "paused") {
+        // Update timestamp to prevent a huge jump when unpausing
+        m_last_update_time = std::chrono::high_resolution_clock::now();
         return {true, m_paused_star_position, m_paused_star_size, m_paused_star_p};
     }
+
+    // 2. Handle Not Running
     if (m_perimetry_status != "running") {
-        return {false, {}, nullptr, {}};
+        return {false, {}, Size_O(), {}};
     }
 
+    // 3. Time Management (Delta Time)
     auto now = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> elapsed = now - m_current_longitude_start_time;
-    m_passed_seconds = elapsed.count();
+    std::chrono::duration<double> elapsed = now - m_last_update_time;
+    double dt = elapsed.count(); // Seconds since last frame
+    m_last_update_time = now; // Reset for next frame
 
-    int longitude_index = m_current_longitude_index + static_cast<int>(m_passed_seconds / m_sec_per_longitude);
+    // Safety: If dt is too large (lag spike), clamp it to avoid teleporting
+    if (dt > 0.1) dt = 0.1;
 
-    if (longitude_index < m_longitudes.size()) {
-        double sec_in_longitude = std::fmod(m_passed_seconds, m_sec_per_longitude);
-        double deg = sec_in_longitude * m_meteoroid_speed;
-        double theta_regler = (deg / 90.0);
+    // 4. Check if we have vectors left
+    if (m_current_longitude_index < m_longitudes.size()) {
 
-        auto [light_point, p] = _get_coordinates(m_longitudes[longitude_index], theta_regler);
-        return {true, light_point, m_current_size, p};
-    } else {
-        // Min. eine Größe fertig. Finde die nächste.
-        MeteoroidSizeID next_id = m_current_size->get_next_size_id();
-        std::shared_ptr<MeteoroideSize> next_size = get_next_valid_size(next_id);
+        // Get current vector data
+        PerimetryVector &current_vec = m_longitudes[m_current_longitude_index];
 
-        if (next_size != nullptr) {
-            m_current_size = next_size;
-            m_current_size->set_distance(m_radius);
-
-            std::vector<double> next_longitudes = m_longitudes_original;
-            if (METEOROID_RANDOM) {
-                std::shuffle(next_longitudes.begin(), next_longitudes.end(), m_rng);
-            }
-            m_longitudes.insert(m_longitudes.end(), next_longitudes.begin(), next_longitudes.end());
-
-            return get_current_point_info(); // Rekursiver Aufruf für den neuen Zustand
-        } else {
-            // Alle Größen fertig
-            m_perimetry_status = "Done";
-            return {false, {}, nullptr, {}};
+        // --- ADAPTIVE SPEED LOGIC ---
+        double current_speed = 1.0;
+        MeteoroidSizeID size_id = std::visit([](auto&& s) {
+            return s.get_id();
+        }, m_current_size);
+        if (mActiveEye == 1) {
+            current_speed = calculate_adaptive_speed(
+                    m_current_radius_deg,
+                    m_goldmann_sheet.m_sheet_right[current_vec.angle_deg][size_id][current_vec.luminance].normalized_angle);
+        } else if (mActiveEye == 2) {
+            current_speed = calculate_adaptive_speed(
+                    m_current_radius_deg,
+                    m_goldmann_sheet.m_sheet_left[current_vec.angle_deg][size_id][current_vec.luminance].normalized_angle);
         }
+
+        // Move the point: Radius decreases (Outer -> Inner)
+        if (point_detected) {
+            dt -= REACTION_TIME; // substract the time it takes to detect the point (reaction time)
+        }
+        m_current_radius_deg += (current_speed * dt);
+
+        if (point_detected) {
+            MeteoroidSizeID curr_size_id = size_id;
+            AnyMeteoroidSize current_size = m_size_map.at(curr_size_id);
+            while (!std::holds_alternative<Size_O>(m_size_map.at(curr_size_id))) {
+                SheetEntry* entry;
+                map<MeteoroidSizeID, map<string, SheetEntry>>* size_lum_sheet;
+                if (mActiveEye == 1) {
+                    entry = &m_goldmann_sheet.m_sheet_right[current_vec.angle_deg][curr_size_id][current_vec.luminance];
+                    size_lum_sheet = &m_goldmann_sheet.m_sheet_right[current_vec.angle_deg];
+                    /*if (entry.normalized_angle == 90 or entry.normalized_angle < 90 - m_current_radius_deg  or curr_size_id == MeteoroidSizeID::V) {
+                        m_goldmann_sheet.m_sheet_right[current_vec.angle_deg][curr_size_id][current_vec.luminance].normalized_angle = 90 - m_current_radius_deg;
+                    }*/
+                } else if (mActiveEye == 2) {
+                    entry = &m_goldmann_sheet.m_sheet_left[current_vec.angle_deg][curr_size_id][current_vec.luminance];
+                    size_lum_sheet = &m_goldmann_sheet.m_sheet_left[current_vec.angle_deg];
+                    /*if (entry.normalized_angle == 90 or entry.normalized_angle < 90 - m_current_radius_deg or curr_size_id == MeteoroidSizeID::V) {
+                        m_goldmann_sheet.m_sheet_left[current_vec.angle_deg][curr_size_id][current_vec.luminance].normalized_angle = 90 - m_current_radius_deg;
+                    }*/
+                }
+                if (size_lum_sheet) {
+                    for (auto size_itr = size_lum_sheet->begin(); size_itr != size_lum_sheet->end(); ++size_itr) {
+                        for (auto lum_itr = size_itr->second.begin(); lum_itr != size_itr->second.end(); ++lum_itr) {
+                            lum_itr->second.normalized_angle = 90 - m_current_radius_deg;
+                        }
+                    }
+                }
+                curr_size_id = std::visit([](auto&& s) {
+                    return s.get_next_size_id();
+                }, current_size);
+                current_size = m_size_map.at(curr_size_id);
+            }
+        }
+
+        // 5. Check if we reached the center (or end of track)
+        if (m_current_radius_deg >= 90.0) {
+            // Vector Complete: Move to next index
+            m_current_longitude_index++;
+            m_current_radius_deg = 0; // Reset to outer rim for next vector
+
+            m_current_size = m_size_map.at(m_longitudes[m_current_longitude_index].size);
+            std::visit([this](auto&& s) {
+                s.set_distance(m_radius);
+            }, m_current_size);
+
+
+            // Recursively call to get data for the new index immediately
+            return get_current_point_info(point_detected);
+        }
+
+        // 6. Calculate Coordinates
+        // Map degrees (90 -> 0) to your theta_regler (0 -> 1 or 1 -> 0 depending on your math)
+        // Assuming your _get_coordinates expects (0 = center, 1 = outer) or similar.
+        // Based on your old code: theta_regler = deg / 90.0.
+        // Note: m_current_radius_deg represents distance from center.
+        double theta_regler = m_current_radius_deg / 90.0;
+
+
+        auto coordinates = _get_coordinates(current_vec.angle_deg, theta_regler);
+        glm::vec3 light_point = coordinates.first;
+        PolarPoint p = coordinates.second;
+
+
+        return {true, light_point, m_current_size, p};
+
+    } else {
+        m_perimetry_status = "Done";
+        return {false, {}, Size_O(), {}};
     }
 }
 
 void Meteoroid::point_detected() {
-    pause_animation();
+    pause_animation(true);
     if (m_perimetry_status != "paused") return;
 
-    m_goldmann_sheet.add_point(m_paused_star_p, m_paused_star_size);
+    PerimetryVector cur_vec = m_longitudes[m_current_longitude_index];
 
-    /* Original Code
-    // Nächste Longitude starten
-    resume_animation();
+    m_goldmann_sheet.add_point(m_paused_star_p, m_paused_star_size, cur_vec.angle_deg, mActiveEye, cur_vec.luminance);
+
     m_current_longitude_index++;
-    m_current_longitude_start_time = std::chrono::high_resolution_clock::now();
-     */
-    // New Code
-    m_current_longitude_index++;
+    m_current_size = m_size_map.at(m_longitudes[m_current_longitude_index].size);
+    std::visit([this](auto&& s) {
+        s.set_distance(m_radius);
+    }, m_current_size);
 
     // 4. Reset time for the NEW animation path
     m_current_longitude_start_time = std::chrono::high_resolution_clock::now();
+    m_current_radius_deg = 0.0;
     m_passed_seconds = 0.0;
 
     // 5. Set status to running (Manually, instead of calling resume_animation)
