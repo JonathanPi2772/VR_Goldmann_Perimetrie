@@ -5,6 +5,7 @@ import argparse
 import os
 import glob
 
+
 # --- Configuration for Clinical Style ---
 # Standard Goldmann sizes usually have specific conventions.
 # We will use different markers/colors to distinguish them.
