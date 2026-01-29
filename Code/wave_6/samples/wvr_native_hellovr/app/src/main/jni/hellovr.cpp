@@ -16,18 +16,18 @@
 #include <sys/time.h>
 #include <cstdlib>
 #include <math.h>
-#include <Texture.h>
-#include <Picture.h>
-#include <SkyBox.h>
+//#include <Texture.h>
+//#include <Picture.h>
+//#include <SkyBox.h>
 #include <Sky.h>
 #include <Settings.h>
 #include <Meteoroid.h>
 #include <Stars.h>
 #include <Terrain.h>
-#include <ControllerAxes.h>
-#include <ControllerCube.h>
+//#include <ControllerAxes.h>
+//#include <ControllerCube.h>
 #include <Controller.h>
-#include <ReticlePointer.h>
+//#include <ReticlePointer.h>
 #include <FrameBufferObject.h>
 #include <GLES2/gl2ext.h>
 #include <GLES3/gl3.h>
@@ -41,9 +41,9 @@
 #include <wvr/wvr_overlay.h>
 #include <wvr/wvr_system.h>
 #include <wvr/wvr_events.h>
-#include <RaySphereIntersection.h>
+//#include <RaySphereIntersection.h>
 
-#include "scene/HandManager.h"
+//#include "scene/HandManager.h"
 
 #include "hellovr.h"
 
@@ -115,7 +115,7 @@ MainApplication::MainApplication()
     mSphere=NULL;
     // mFloor=NULL;
     mGridPicture = NULL;
-    mReticlePointer = NULL;
+    //mReticlePointer = NULL;
     mActiveEye=0; //0 for not started 1 for right, 2 for left
     // Initialize Menu Panel
     // Position: x=0, y=1.5 (eye level), z=-2.0 (2 meters in front)
@@ -132,6 +132,17 @@ MainApplication::MainApplication()
     mShowLeftEyeMenu = false;
     mShowEndMenu = false;
     allDataSaved = false;
+
+    //paused Menu
+    mPauseMenu = NULL;
+    mShowPauseMenu = false;
+    realPausedReleased = false;
+    mPausedReleased = std::chrono::high_resolution_clock::now();
+
+
+
+    std::random_device rd;
+    m_rng.seed(rd());
 
 
 #if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
@@ -256,6 +267,15 @@ bool MainApplication::initGL() {
     mEndMenu->setTexture("textures/EndBox.png");
     mShowEndMenu = false;
 
+    // Pause Menu
+    mPauseMenu = new SkySphere();
+    mPauseMenu->setTexture("textures/PauseMenu.png");
+    mShowPauseMenu = false;
+    realPausedReleased = false;
+    mPausedReleased = std::chrono::high_resolution_clock::now();
+
+
+
     // Setup Scenes
     mStars = new Stars(gDebug);
     OBJ_ERROR_CHECK(mStars);
@@ -263,13 +283,14 @@ bool MainApplication::initGL() {
     OBJ_ERROR_CHECK(mSky);
     mMeteoroid = new Meteoroid();
     OBJ_ERROR_CHECK(mMeteoroid);
-    // Todo: Has to be started, after the Textbox is gone
-    // mMeteoroid->start_animation();
     mTerrain = new Terrain(gDebug);
     OBJ_ERROR_CHECK(mTerrain);
     mLightDir = Vector4(0, 1, 0, 0);
 
     // Set Balancing Eye
+    std::bernoulli_distribution coin_flip(0.5);
+    mFirstEye = coin_flip(m_rng) ? 1 : 2;
+    /*
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     float rndNumber = dist(m_rng);
     if (rndNumber < 0.5f) {
@@ -277,11 +298,7 @@ bool MainApplication::initGL() {
     } else {
         mFirstEye = 2;
     }
-
-
-
-    // mGridPicture = new Picture();
-    // OBJ_ERROR_CHECK(mGridPicture);
+    */
 
 
 #if defined(USE_CONTROLLER)
@@ -295,8 +312,8 @@ bool MainApplication::initGL() {
     OBJ_ERROR_CHECK(mControllerAxes);
 #endif
 
-    mReticlePointer = new ReticlePointer();
-    OBJ_ERROR_CHECK(mReticlePointer);
+    //mReticlePointer = new ReticlePointer();
+    //OBJ_ERROR_CHECK(mReticlePointer);
 
     setupCameras();
 
@@ -383,11 +400,11 @@ bool MainApplication::initGL() {
      * WVR_EnableAdaptiveQuality(true, WVR_QualityStrategy_SendQualityEvent | WVR_QualityStrategy_AutoFoveation);
      */
 #endif
-    mHandManager = new HandManager(WVR_HandTrackerType_Natural);
+    /*mHandManager = new HandManager(WVR_HandTrackerType_Natural);
     mHandManager->onCreate();
     mHandManager->registerPinchReleasedCallback(
         std::bind(&MainApplication::handleHandInput, this, std::placeholders::_1));
-
+    */
     // Initialize eye tracking
     if (!initEyeTracking()) {
         LOGW("Eye tracking not available, continuing without it");
@@ -399,9 +416,10 @@ void MainApplication::shutdownGL() {
     LOGENTRY();
 
     shutdownEyeTracking();
-    mHandManager->onDestroy();
+    /*mHandManager->onDestroy();
     delete mHandManager;
     mHandManager = nullptr;
+     */
     /*
     if (mFloor != NULL )
         delete mFloor;
@@ -432,6 +450,7 @@ void MainApplication::shutdownGL() {
         delete mGridPicture;
     mGridPicture = NULL;
 
+
 #if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
     for (uint32_t cID = 0; cID < 2; ++cID) {
         if (mControllerObjs[cID] != nullptr) {
@@ -452,10 +471,11 @@ void MainApplication::shutdownGL() {
     }
     mControllerCubes.clear();
 #endif
-
+    /*
     if (mReticlePointer != NULL)
         delete mReticlePointer;
     mReticlePointer = NULL;
+     */
 
     if (mLeftEyeQ != 0) {
         for (int i = 0; i < WVR_GetTextureQueueLength(mLeftEyeQ); i++) {
@@ -519,27 +539,6 @@ public:
     }
 };
 
-void MainApplication::moveSphereHandler() {
-    Vector3 pos;
-
-    if (!mSphere) return;
-    if (mCurFocusController==WVR_DeviceType_Controller_Right) {
-        if(mSphere->getCenter()==oriSpherePos){
-            pos=Vector3(1,0,0)+mSphere->getCenter();
-        }else{
-            pos=oriSpherePos;
-        }
-        mSphere->setSpherePos(pos);
-    } else if (mCurFocusController==WVR_DeviceType_Controller_Left) {
-        if(mSphere->getCenter()==oriSpherePos){
-            pos=Vector3(-1,0,0)+mSphere->getCenter();
-        }else{
-            pos=oriSpherePos;
-        }
-        mSphere->setSpherePos(pos);
-    }
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Poll events.  Quit application if return true.
 //-----------------------------------------------------------------------------
@@ -586,10 +585,9 @@ bool MainApplication::handleInput() {
             handleControllerConnectEvent(isCtrlerStatusChange);
 #endif
 
-        mHandManager->handleHandTrackingMechanism();
+        //mHandManager->handleHandTrackingMechanism();
 
         if (event.common.type == WVR_EventType_ButtonPressed) {
-            // Controller Right
             if (
                     (event.device.deviceType == WVR_DeviceType_Controller_Right) or
                     (event.device.deviceType == WVR_DeviceType_Controller_Left)) {
@@ -605,12 +603,14 @@ bool MainApplication::handleInput() {
                         mShowRightEyeMenu = false;
                         mMeteoroid->start_animation();
                         mActiveEye = 1;
+                        mMeteoroid->mActiveEye = 1;
                     }
 
                     if (mShowLeftEyeMenu) {
                         mShowLeftEyeMenu = false;
                         mMeteoroid->start_animation();
                         mActiveEye = 2;
+                        mMeteoroid->mActiveEye = 2;
                     }
 
                     if (mShowStartMenu) {
@@ -625,57 +625,22 @@ bool MainApplication::handleInput() {
                     if (mShowEndMenu) {
                         mShowEndMenu = false;
                         mActiveEye = 0;
+                        mMeteoroid->mActiveEye = 0;
+                        CloseApplication();
                     }
-
-                }
-            // Controller Left
-            } /* else if (event.device.deviceType == WVR_DeviceType_Controller_Left) {
-                if (
-                        (event.input.inputId == WVR_InputId_Alias1_Bumper) or
-                        (event.input.inputId == WVR_InputId_Alias1_Trigger) or
-                        (event.input.inputId == WVR_InputId_Alias1_Touchpad)
-                        ) {
-                    mMeteoroid->point_detected();
-                }
-            }*/ /*
-            // Todo: Change from Sphere Handler to press Button for detecting the point
-            if (event.device.deviceType == WVR_DeviceType_Controller_Right
-                && event.input.inputId == WVR_InputId_Alias1_Bumper){
-                mMeteoroid->point_detected();
-            }
-            if (event.device.deviceType == WVR_DeviceType_Controller_Left
-                && event.input.inputId == WVR_InputId_Alias1_Bumper){
-                mMeteoroid->point_detected();
-            }
-
-            if (event.device.deviceType == WVR_DeviceType_Controller_Right
-                && event.input.inputId == WVR_InputId_Alias1_Trigger){
-                mMeteoroid->point_detected();
-            }
-            if (event.device.deviceType == WVR_DeviceType_Controller_Left
-                && event.input.inputId == WVR_InputId_Alias1_Trigger){
-                mMeteoroid->point_detected();
-            }
-
-            if (event.device.deviceType == WVR_DeviceType_Controller_Right
-                && event.input.inputId == WVR_InputId_Alias1_Touchpad){
-                mMeteoroid->point_detected();
-            }
-
-            if (event.device.deviceType == WVR_DeviceType_Controller_Left
-                && event.input.inputId == WVR_InputId_Alias1_Touchpad){
-                mMeteoroid->point_detected();
-            }
-
-            if (event.input.inputId == WVR_InputId_Alias1_Grip) {
-                if (mSphere && mEyeTrackingEnabled) {
-                    bool currentState = mSphere->isFollowingGaze();
-                    mSphere->setFollowGaze(!currentState);
-                    LOGI("Eye tracking follow mode: %s", !currentState ? "ON" : "OFF");
+                // If A or X Button is Pressed
+                } else if ((event.input.inputId == WVR_InputId_Alias1_A) or
+                           (event.input.inputId == WVR_InputId_Alias1_X)) {
+                    if (mShowPauseMenu) {
+                        realPausedReleased = true;
+                        mShowPauseMenu = false;
+                        mPausedReleased = std::chrono::high_resolution_clock::now();
+                    } else {
+                        mShowPauseMenu = true;
+                        mMeteoroid->pause_animation(false);
+                    }
                 }
             }
-            */
-
         }
     }
     if (resolutionChange) {
@@ -684,7 +649,7 @@ bool MainApplication::handleInput() {
     return false;
 }
 
-void MainApplication::handleHandInput(HandTypeEnum handType) {
+/*void MainApplication::handleHandInput(HandTypeEnum handType) {
     if (mSphere != nullptr && mHandManager != nullptr) {
         if (mPointToSphere == true) {
             Vector3 pos;
@@ -705,44 +670,7 @@ void MainApplication::handleHandInput(HandTypeEnum handType) {
             }
         }
     }
-}
-
-void MainApplication::calculateHandInteraction(DrawModeEnum iMode, size_t iEyeID) {
-    if ((iMode == DrawMode_Multiview || (iMode == DrawMode_General && iEyeID == 0)) == false) {
-        return;
-    }
-
-    mPointToSphere = false;
-    currColor = Sphere::Color::green;
-
-    if (mSphere != nullptr && mHandManager != nullptr) {
-        for (uint32_t handType = 0; handType < Hand_MaxNumber; ++handType) {
-            if (mHandManager->isPinchPose(static_cast<HandTypeEnum>(handType)) == true && mPointToSphere == false) {
-                // Get center & radius of the sphere
-                Vector3 sCenter = mSphere->getCenter();
-                Point3D center = {sCenter.x, sCenter.y, sCenter.z};
-                Sphere3D sphere = {center, mSphere->getRadius()};
-                Matrix4 shift; shift.translate(1.0, 1.5, 2);
-                Matrix4 rayMat = shift * mHandManager->getHandRayMat(static_cast<HandTypeEnum>(handType));
-                Vector3 collision;
-                Ray3D ray(
-                    Point3D(rayMat[12], rayMat[13], rayMat[14]),
-                    Vector3D(-rayMat[8], -rayMat[9], -rayMat[10]),
-                    collision);
-                mPointToSphere = intersection(ray, sphere);
-                if (mPointToSphere == true) {
-                    if (handType == Hand_Right) {
-                        currColor = Sphere::Color::red;
-                    } else {
-                        currColor = Sphere::Color::blue;
-                    }
-                } else {
-                    currColor = Sphere::Color::green;
-                }
-            }
-        }
-    }
-}
+}*/
 
 void MainApplication::switchResolution() {
 #if ENABLE_LOW_FOVEATED_RENDERING
@@ -770,18 +698,6 @@ void MainApplication::switchResolution() {
             }
     }
 #endif
-}
-
-void MainApplication::switchGazeTriggerType() {
-    if (mGazeTriggerType == WVR_GazeTriggerType_Timeout) {
-        mGazeTriggerType = WVR_GazeTriggerType_Button;
-    } else if (mGazeTriggerType == WVR_GazeTriggerType_Button) {
-        mGazeTriggerType = WVR_GazeTriggerType_TimeoutButton;
-    } else if (mGazeTriggerType == WVR_GazeTriggerType_TimeoutButton) {
-        mGazeTriggerType = WVR_GazeTriggerType_Timeout;
-    }
-    LOGD("switchGazeTriggerType mGazeTriggerType: %d", mGazeTriggerType);
-    WVR_SetGazeTriggerType(mGazeTriggerType);
 }
 
 //-----------------------------------------------------------------------------
@@ -1038,231 +954,6 @@ bool MainApplication::renderFrame() {
     return false;
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Draw all of the controllers as X/Y/Z lines
-//-----------------------------------------------------------------------------
-void MainApplication::drawControllers() {
-    // don't draw controllers if somebody else has input focus
-//    LOGI("drawControllers(): start");
-    if (WVR_IsInputFocusCapturedBySystem())
-        return;
-
-    if (mInteractionMode == WVR_InteractionMode_Gaze) {
-        return;
-    }
-
-    std::vector<float> buffer;
-
-    int vertCount = 0;
-    mControllerCount = 0;
-    WVR_DeviceType type;
-    for (uint32_t id = WVR_DEVICE_HMD + 1; id < WVR_DEVICE_COUNT_LEVEL_1; ++id) {
-        if ((mVRDevicePairs[id].type != WVR_DeviceType_Controller_Right) && (mVRDevicePairs[id].type != WVR_DeviceType_Controller_Left)){
-//            LOGD("drawControllers(): not Controller : %d ", mVRDevicePairs[id].type);
-            continue;
-        }
-
-        if (!WVR_IsDeviceConnected(mVRDevicePairs[id].type)){
-//            LOGD("drawControllers(): DeviceType: %d pose is disconnected :", mVRDevicePairs[id].type);
-            continue;
-        }
-
-        if (!mVRDevicePairs[id].pose.isValidPose) {
-//            LOGD("drawControllers(): DeviceType: %d pose is invalid", mVRDevicePairs[id].type);
-            continue;
-        }
-
-        type= mVRDevicePairs[id].type;
-//        LOGD("drawControllers(): DeviceType: %d start ",type);
-
-
-        Matrix4 mat;
-        if (m3DOF) {
-            // If the controller is 3DOF always put the model in the bottom of the view.
-            mat = mDevicePoseArray[WVR_DEVICE_HMD];
-            mat.invert();
-            float angleY = atan2f(-mat[8], mat[10]);  // Yaw
-            float angleX = asin(-mat[9]);             // Pitch
-            float angleZ = atan2f(mat[1], mat[5]);    // Roll
-
-            mat.identity().rotateY(-angleY / M_PI * 180.0f);
-            mat.rotateX(angleX / M_PI * 180.0f);
-            mat.rotateZ(angleZ / M_PI * 180.0f);
-            mat *= mDevicePoseArray[id];
-
-            int offset = mVRDevicePairs[id].type - WVR_DeviceType_Controller_Right;
-            float x = (offset % 2) == 0 ? 0.1f : -0.1f;
-            float z = -0.45f - (offset / 2) * 0.3f;
-            mat.setColumn(3, Vector4(x,-0.12f,z,1));
-        } else {
-            mat = mDevicePoseArray[id];
-        }
-#if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
-#else
-        vertCount += mControllerAxes->makeVertices(mat, buffer);
-#endif
-        mControllerCount += 1;
-
-        /**
-         * Add Raycaster to hit the sphere
-         */
-        Matrix4 WorldFromHead;
-        WorldFromHead=mDevicePoseArray[WVR_DEVICE_HMD];
-        Matrix4 WorldFromController_new=WorldFromHead*mat;
-
-        Matrix4 mat4WorldRotation;
-        mat4WorldRotation.rotate(mWorldRotation, 0, 1, 0); // if world is rotated , the ray of controller is also changed too.
-
-#if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
-        uint32_t ctrlerRealID = 0;
-        for (uint32_t cID = 0; cID < 2; ++cID) {
-            if (mControllerObjs[cID] != nullptr) {
-                if (mControllerObjs[cID]->getCtrlerType() == mVRDevicePairs[id].type) {
-                    ctrlerRealID = cID;
-                    break;
-                }
-            }
-        }
-        Matrix4 emitterPose = mControllerObjs[ctrlerRealID]->getEmitterPose();
-
-        WorldFromController_new = mWorldTranslation * mat4WorldRotation * WorldFromController_new * emitterPose; //Because default World position that wee see doesn't base on (0,0,0) , so we need to use actual translation matrix to make ray coordinate as same as current coordinate of the world.
-#else
-        WorldFromController_new = mWorldTranslation * mat4WorldRotation * WorldFromController_new; //Because default World position that wee see doesn't base on (0,0,0) , so we need to use actual translation matrix to make ray coordinate as same as current coordinate of the world.
-#endif
-        Point3D origin = {WorldFromController_new[12], WorldFromController_new[13], WorldFromController_new[14]};
-
-        Vector3 front(0.0f, 0.0f, -1.0f);
-        Matrix3 mat3(WorldFromController_new[0], WorldFromController_new[1], WorldFromController_new[2], WorldFromController_new[4], WorldFromController_new[5], WorldFromController_new[6], WorldFromController_new[8], WorldFromController_new[9], WorldFromController_new[10]);
-        Vector3 direction3 =(mat3 * front).normalize();
-
-        Vector3D direction = {direction3.x, direction3.y, direction3.z};
-
-        Vector3 c; //get real collision point
-        Ray3D ray = {origin, direction,c};
-
-        // Get center & radius of the sphere
-        Vector3 sCenter = mSphere->getCenter();
-        Point3D center = {sCenter.x, sCenter.y, sCenter.z};
-        Sphere3D sphere = {center, mSphere->getRadius()};
-
-//        LOGD("drawControllers(): mPointToSphere DeviceType start: %d ", mVRDevicePairs[id].type);
-        // Check if the ray intersects the sphere
-
-        mPointToSphere = intersection(ray, sphere);
-
-        if(mVRDevicePairs[id].type==WVR_DeviceType_Controller_Right){
-
-            if(mPointToSphere){
-//                LOGD("drawControllers(): Right_Controller Hit");
-                if(!mPointToSphere_R){
-                    currColor=Sphere::Color ::red;
-                    mPointToSphere_R=true;
-                    mCurFocusController=WVR_DeviceType_Controller_Right;
-                }
-            }else{
-                if (mPointToSphere_R){
-                    mPointToSphere_R= false;
-                    if(mPointToSphere_L){
-                        currColor=Sphere::Color ::blue;
-                        mCurFocusController=WVR_DeviceType_Controller_Left;
-                    }else{
-                        currColor=Sphere::Color ::green;
-                        mCurFocusController=WVR_DeviceType_HMD;
-                    }
-                }
-
-            }
-        }else{
-            if(mPointToSphere){
-//                LOGD("drawControllers(): Left_Controller Hit");
-                if(!mPointToSphere_L) {
-                    currColor=Sphere::Color ::blue;
-                    mPointToSphere_L=true;
-                    mCurFocusController=WVR_DeviceType_Controller_Left;
-                }
-            }else{
-                if (mPointToSphere_L){
-                    mPointToSphere_L= false;
-                    if(mPointToSphere_R){
-                        currColor=Sphere::Color ::red;
-                        mCurFocusController=WVR_DeviceType_Controller_Right;
-                    }else{
-                        currColor=Sphere::Color ::green;
-                        mCurFocusController=WVR_DeviceType_HMD;
-                    }
-                }
-
-            }
-        }
-    }
-#if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
-#else
-    mControllerAxes->setVertices(buffer, vertCount);
-#endif
-//    LOGI("drawControllers(): end");
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Draw reticle pointer
-//-----------------------------------------------------------------------------
-void MainApplication::drawReticlePointer() {
-    if (WVR_IsInputFocusCapturedBySystem())
-        return;
-
-        std::vector<float> buffer;
-
-        int vertCount = 0;
-        WVR_DeviceType type;
-        if (!mVRDevicePairs[WVR_DEVICE_HMD].pose.isValidPose) {
-            LOGD("drawReticle(): DeviceType: HMD pose is invalid");
-            return;
-        }
-        type= WVR_DeviceType_HMD;
-
-        Matrix4 mat;
-        /**
-        * Add Raycaster to hit the sphere
-        */
-        Matrix4 WorldFromHead;
-        Matrix4 WorldFromReticlePointer_new;
-        //WorldFromHead =mDevicePoseArray[WVR_DEVICE_HMD];
-        WorldFromReticlePointer_new = mDevicePoseArray[WVR_DEVICE_HMD];
-
-        Matrix4 mat4WorldRotation;
-        mat4WorldRotation.rotate(mWorldRotation, 0, 1, 0); // if world is rotated , the reticle pointer is also changed too.
-        WorldFromReticlePointer_new = mWorldTranslation*mat4WorldRotation * WorldFromReticlePointer_new; //Because default World position that wee see doesn't base on (0,0,0) , so we need to use actual translation matrix to make ray coordinate as same as current coordinate of the world.
-        Point3D origin = {WorldFromReticlePointer_new[12], WorldFromReticlePointer_new[13], WorldFromReticlePointer_new[14]};
-
-        Vector3 front(0.0f, 0.0f, -1.0f);
-        Matrix3 mat3(WorldFromReticlePointer_new[0], WorldFromReticlePointer_new[1], WorldFromReticlePointer_new[2], WorldFromReticlePointer_new[4], WorldFromReticlePointer_new[5], WorldFromReticlePointer_new[6], WorldFromReticlePointer_new[8], WorldFromReticlePointer_new[9], WorldFromReticlePointer_new[10]);
-        Vector3 direction3 = (mat3 * front).normalize();
-
-        Vector3D direction = {direction3.x, direction3.y, direction3.z};
-        Vector3 c; //get real collision point
-        Ray3D ray = {origin, direction,c};
-
-        // Get center & radius of the sphere
-        Vector3 sCenter = mSphere->getCenter();
-        Point3D center = {sCenter.x, sCenter.y, sCenter.z};
-
-        Sphere3D sphere = {center, mSphere->getRadius()};
-
-        //Check if the ray intersects the sphere
-        mPointToSphere = intersection(ray, sphere);
-
-        if(mPointToSphere){
-            currColor= (WVR_GetDefaultControllerRole() == WVR_DeviceType_Controller_Right)
-                ? Sphere::Color ::red : Sphere::Color ::blue;
-            mCurFocusController = (WVR_GetDefaultControllerRole() == WVR_DeviceType_Controller_Right)
-                ? WVR_DeviceType_Controller_Right : WVR_DeviceType_Controller_Left;
-        }else{
-            currColor=Sphere::Color ::green;
-            mCurFocusController = WVR_DeviceType_HMD;
-        }
-    vertCount += mReticlePointer->makeVertices(WorldFromReticlePointer_new, buffer);
-    mReticlePointer->setVertices(buffer, vertCount);
-}
-
 void MainApplication::setupCameras() {
     mProjectionLeft = wvrmatrixConverter(
         WVR_GetProjection(WVR_Eye_Left, mNearClip, mFarClip));
@@ -1279,8 +970,8 @@ void MainApplication::setupCameras() {
     dumpMatrix("EyePosLeft", mEyePosLeft);
     dumpMatrix("EyePosRight", mEyePosRight);
 
-    // Initial position need a little backward and upper to avoid been in a cube.
-    mWorldTranslation.identity().setColumn(3, Vector4(1.0f, 1.5f, 2.0f, 1));
+    // Initial position
+    mWorldTranslation.identity().setColumn(3, Vector4(0.0f, 0.0f, 0.0f, 1));
     mWorldRotation = 0;
     gettimeofday(&mRtcTime, NULL);
 }
@@ -1345,9 +1036,11 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             mMeteoroid->reset_animation();
             if (mFirstEye == 1) {
                 mActiveEye = 2;
+                mMeteoroid->mActiveEye = 2;
                 mShowLeftEyeMenu = true;
             } else if (mFirstEye == 2) {
                 mActiveEye = 1;
+                mMeteoroid->mActiveEye = 1;
                 mShowRightEyeMenu = true;
             }
         } else {
@@ -1358,7 +1051,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             }
         }
     }
-
+    /*
     if (mGridPicture && mGridPicture->isEnabled()) {
         if (nEye == WVR_Eye_Left)
             mGridPicture->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
@@ -1366,6 +1059,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
             mGridPicture->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
         return;
     }
+     */
     // Menus
     if (mStartMenu && mShowStartMenu) {
         if (nEye == WVR_Eye_Left)
@@ -1391,6 +1085,22 @@ void MainApplication::renderScene(WVR_Eye nEye) {
         else if (nEye == WVR_Eye_Right)
             mEndMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
     }
+    if (mPauseMenu && mShowPauseMenu) {
+        if (nEye == WVR_Eye_Left)
+            mPauseMenu->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
+        else if (nEye == WVR_Eye_Right)
+            mPauseMenu->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
+    }
+
+    if (realPausedReleased) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - mPausedReleased);
+        if (duration.count() > 4) {
+            realPausedReleased = false;
+            mShowPauseMenu = false;
+            mPausedReleased = now;
+            mMeteoroid->resume_animation();
+    }
 
 
 
@@ -1403,7 +1113,7 @@ void MainApplication::renderScene(WVR_Eye nEye) {
     }
 
     // Meteoroid
-    if (mMeteoroid) {
+    if (mMeteoroid and !mShowPauseMenu) {
         if (nEye == WVR_Eye_Left and mActiveEye == 2)
             mMeteoroid->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right and mActiveEye == 1)
@@ -1424,173 +1134,15 @@ void MainApplication::renderScene(WVR_Eye nEye) {
         else if (nEye == WVR_Eye_Right)
             mTerrain->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
     }
-    /*
-    // Controller Axes
-    bool isInputCapturedBySystem = WVR_IsInputFocusCapturedBySystem();
-#if defined(USE_CONTROLLER) || defined(USE_CUSTOM_CONTROLLER)
-    if (isInputCapturedBySystem == false) {
-        for (uint32_t cID = 0; cID < 2; ++cID) {
-            if (mControllerObjs[cID] != nullptr && mInteractionMode != WVR_InteractionMode_Gaze) {
-                //uint32_t idx = mControllerObjs[cID]->getCtrlerType() - WVR_DeviceType_HMD;
-                uint32_t ctrlerRealID = 0;
-                for (uint32_t devID = 0; devID < WVR_DEVICE_COUNT_LEVEL_1; ++devID) {
-                    if (mControllerObjs[cID]->getCtrlerType() == mVRDevicePairs[devID].type) {
-                        ctrlerRealID = devID;
-                        break;
-                    }
-                }
-                if (mVRDevicePairs[ctrlerRealID].pose.isValidPose == true) {
-                    Matrix4 ctrlerPose = mDevicePoseArray[ctrlerRealID];
-                    Matrix4 projs[2], eyes[2];
-                    Matrix4 view;
-                    if(m3DOF){
-                        view = mHMDPose;
-                    }
-                    if (nEye == WVR_Eye_Left) {
-                        projs[0] = mProjectionLeft;
-                        eyes[0] = mEyePosLeft;
-                        mControllerObjs[cID]->render(DrawMode_General, projs, eyes, view, ctrlerPose);
-                    } else if (nEye == WVR_Eye_Right) {
-                        projs[0] = mProjectionRight;
-                        eyes[0] = mEyePosRight;
-                        mControllerObjs[cID]->render(DrawMode_General, projs, eyes, view, ctrlerPose);
-                    }
-                } else {
-#if defined(USE_CONTROLLER)
-                    mControllerObjs[cID]->resetButtonEffects();
-#endif
-                }
-            }
-        }
-    }
-#else
-    if (!isInputCapturedBySystem) {
-        Matrix4 view;
-        if (!m3DOF) {
-            view = mHMDPose;
-        }
-        if (mControllerAxes) {
-            if (mInteractionMode == WVR_InteractionMode_SystemDefault || mInteractionMode == WVR_InteractionMode_Controller){
-                if (nEye == WVR_Eye_Left)
-                    mControllerAxes->draw(mProjectionLeft, mEyePosLeft, view, mLightDir);
-                else if (nEye == WVR_Eye_Right)
-                    mControllerAxes->draw(mProjectionRight, mEyePosRight, view, mLightDir);
-            }
-        }
-    }
-    //
 
-    // Controller cube
-    int localControllerIdx = -1;
-    for (uint32_t id = WVR_DEVICE_HMD + 1;
-            id < WVR_DEVICE_COUNT_LEVEL_1; id++) {
-        if ((mVRDevicePairs[id].type != WVR_DeviceType_Controller_Right) && (mVRDevicePairs[id].type != WVR_DeviceType_Controller_Left))
-            continue;
-
-        if (!WVR_IsDeviceConnected(mVRDevicePairs[id].type))
-            continue;
-
-        const WVR_PoseState_t & pose = mVRDevicePairs[id].pose;
-        if (!pose.isValidPose)
-            continue;
-
-        if (isInputCapturedBySystem)
-            continue;
-
-        // When device Connection is confirmed, keep its location even not draw it.
-        localControllerIdx++;
-
-        // Load the controller cube asynchronously.
-        if (mControllerCubeTableById[id] == NULL) {
-            setupControllerCubeForDevice((WVR_DeviceType)(id + WVR_DeviceType_HMD));
-            continue;
-        }
-
-        // If button Grip is pressed, hide controller cube.
-        if (!mShowDeviceArray[id])
-            continue;
-
-        ControllerCube * ControllerCube = mControllerCubeTableById[id];
-        const Matrix4 & matDeviceToTracking = mDevicePoseArray[id];
-        Matrix4 view;
-        if (m3DOF) {
-            // If the controller is 3DOF always put the model in the bottom of the view.
-            Matrix4 mat = mDevicePoseArray[WVR_DEVICE_HMD];
-            mat.invert();
-            float angleY = atan2f(-mat[8], mat[10]);  // Yaw
-            float angleX = asin(-mat[9]);             // Pitch
-            float angleZ = atan2f(mat[1], mat[5]);    // Roll
-
-            mat.identity().rotateY(-angleY / M_PI * 180.0f);
-            mat.rotateX(angleX / M_PI * 180.0f);
-            mat.rotateZ(angleZ / M_PI * 180.0f);
-            mat *= matDeviceToTracking;
-            int offset = mVRDevicePairs[id].type - WVR_DeviceType_Controller_Right;
-            float x = (offset % 2) == 0 ? 0.1f : -0.1f;
-            float z = -0.45 - (offset / 2) * 0.3f;
-            mat.setColumn(3, Vector4(x,-0.12f,z,1));
-            ControllerCube->getTransform().set(mat.get());
-            ControllerCube->getNormalMatrix() = ControllerCube->makeNormalMatrix(matDeviceToTracking);
-        } else {
-            view = mHMDPose;
-            ControllerCube->getTransform().set(matDeviceToTracking.get());
-        }
-        Vector4 light = mLightDir;
-        if (!mLight)
-            light = Vector4(0,0,0,1);
-
-        if (mInteractionMode == WVR_InteractionMode_SystemDefault || mInteractionMode == WVR_InteractionMode_Controller){
-            if (nEye == WVR_Eye_Left)
-                ControllerCube->draw(mProjectionLeft, mEyePosLeft, view, light);
-            else if (nEye == WVR_Eye_Right)
-                ControllerCube->draw(mProjectionRight, mEyePosRight, view, light);
-        }
-    }
-#endif
-    mHandManager->update(DrawMode_General, nEye);
-    if (mInteractionMode == WVR_InteractionMode_Hand) {
-        calculateHandInteraction(DrawMode_General, nEye);
-    }
-
-    // Reticle Pointer
-    if(mReticlePointer){
-        Vector4 light = mLightDir;
-        if (!mLight)
-        light = Vector4(0,0,0,1);
-        Matrix4 view = mHMDPose;
-        // Gaze mode, use reticle pointer as input module
-        if (mInteractionMode == WVR_InteractionMode_Gaze){
-            if (nEye == WVR_Eye_Left)
-                mReticlePointer->draw(mProjectionLeft, mEyePosLeft, view, light);
-            else if (nEye == WVR_Eye_Right)
-                mReticlePointer->draw(mProjectionRight, mEyePosRight, view, light);
-        }
-    }
-    */
     // Sphere
-    if (mSphere) {
+    if (mSphere and (!mShowStartMenu and !mShowRightEyeMenu and !mShowLeftEyeMenu and !mShowEndMenu and !mShowPauseMenu)) {
     // mSphere->setSphereColor(currColor);
         if (nEye == WVR_Eye_Left)
             mSphere->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
         else if (nEye == WVR_Eye_Right)
             mSphere->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
     }
-    // Floor is not necessary any more
-    // if (mFloor) {
-        // if (nEye == WVR_Eye_Left)
-            // mFloor->draw(mProjectionLeft, mEyePosLeft, mHMDPose, mLightDir);
-        // else if (nEye == WVR_Eye_Right)
-        // mFloor->draw(mProjectionRight, mEyePosRight, mHMDPose, mLightDir);
-    // }
-    /*
-    if (isInputCapturedBySystem == false && mInteractionMode == WVR_InteractionMode_Hand) {
-        Matrix4 projs[2], eyes[2];
-        projs[WVR_Eye_Left] = mProjectionLeft;
-        eyes[WVR_Eye_Left] = mEyePosLeft;
-        projs[WVR_Eye_Right] = mProjectionRight;
-        eyes[WVR_Eye_Right] = mEyePosRight;
-        mHandManager->render(DrawMode_General, nEye, projs, eyes, mHMDPose);
-    }*/
 
     glUseProgram(0);
 
@@ -1777,29 +1329,28 @@ void MainApplication::updateEyeTracking() {
     if (result != WVR_Success) {
         return;
     }
+    bool isSet = false;
+    Vector3 gazeDirLocal;
+    if ((mActiveEye == 1) && mEyeTrackingData.right.eyeTrackingValidBitMask /*&& WVR_GazeDirectionNormalizedValid*/) {
+        gazeDirLocal = Vector3(
+                mEyeTrackingData.right.gazeDirectionNormalized.v[0],
+                mEyeTrackingData.right.gazeDirectionNormalized.v[1],
+                mEyeTrackingData.right.gazeDirectionNormalized.v[2]
+        );
+        isSet = true;
+    }
+    if ((mActiveEye == 2) && mEyeTrackingData.left.eyeTrackingValidBitMask /*&& WVR_GazeDirectionNormalizedValid*/) {
+        gazeDirLocal = Vector3(
+                mEyeTrackingData.left.gazeDirectionNormalized.v[0],
+                mEyeTrackingData.left.gazeDirectionNormalized.v[1],
+                mEyeTrackingData.left.gazeDirectionNormalized.v[2]
+        );
+        isSet = true;
+    }
 
     // Check if combined gaze data is valid
-    if (/*OLD CODE(mEyeTrackingData.combined.eyeTrackingValidBitMask & WVR_GazeOriginValid) && */
-        (mEyeTrackingData.combined.eyeTrackingValidBitMask & WVR_GazeDirectionNormalizedValid)) {
-        /* OLD CODE
-        // Calculate gaze focus point in world space
-        Vector3 gazeFocusPoint = calculateGazeFocusPoint();
-
-        // Add gaze position to sphere's history
-        mSphere->addGazePosition(gazeFocusPoint);
-
-        // Update sphere position based on delayed gaze
-        mSphere->updateSphereFromGaze();
-         */
-        // New Code
+    if (isSet) {
         // --- A. CALCULATE VECTORS ---
-
-        // Get Gaze Direction (Local Head Space)
-        Vector3 gazeDirLocal(
-                mEyeTrackingData.combined.gazeDirectionNormalized.v[0],
-                mEyeTrackingData.combined.gazeDirectionNormalized.v[1],
-                mEyeTrackingData.combined.gazeDirectionNormalized.v[2]
-        );
         gazeDirLocal = gazeDirLocal.normalize(); // Ensure it's normalized
 
         // Get Sphere Position (World Space)
@@ -1847,7 +1398,6 @@ void MainApplication::updateEyeTracking() {
         // DEFINE TOLERANCE: How strict are we?
         // 8-10 degrees is usually a comfortable "foveal" view.
         // 15+ degrees is very loose.
-        const float MAX_ACCEPTANCE_ANGLE_DEG = 10.0f;
 
         if (angle <= MAX_ACCEPTANCE_ANGLE_DEG) {
             // --- STATE: LOOKING AT SPHERE ---
@@ -1861,52 +1411,10 @@ void MainApplication::updateEyeTracking() {
             mSphere->setSphereColor(Sphere::Color::red);   // Renders as Red
 
             if (mMeteoroid) {
-                mMeteoroid->pause_animation();
+                mMeteoroid->pause_animation(false);
             }
         }
     }
-}
-
-Vector3 MainApplication::calculateGazeFocusPoint() {
-    // 1. Get Local Gaze (Relative to Head)
-    // Todo: Maybe change to only one eye, when r/l eye is selected
-    Vector3 gazeOrigin(
-            mEyeTrackingData.combined.gazeOrigin.v[0],
-            mEyeTrackingData.combined.gazeOrigin.v[1],
-            mEyeTrackingData.combined.gazeOrigin.v[2]
-    );
-
-    Vector3 gazeDirection(
-            mEyeTrackingData.combined.gazeDirectionNormalized.v[0],
-            mEyeTrackingData.combined.gazeDirectionNormalized.v[1],
-            mEyeTrackingData.combined.gazeDirectionNormalized.v[2]
-    );
-
-    // 2. Calculate World Matrix (World Translation * World Rotation * HMD Pose)
-    Matrix4 mat4WorldRotation;
-    mat4WorldRotation.rotate(mWorldRotation, 0, 1, 0);
-
-    // Combine to get the full Head-to-World matrix
-    Matrix4 headToWorld = mWorldTranslation * mat4WorldRotation * mDevicePoseArray[WVR_DEVICE_HMD];
-
-    // 3. Transform Origin and Direction to World Space
-    // Transform Point (Origin)
-    Vector3 worldOrigin = headToWorld * gazeOrigin;
-
-    // Transform Vector (Direction) - Rotation only, no translation
-    // Extract rotation sub-matrix (3x3)
-    Matrix3 rotMat(
-            headToWorld[0], headToWorld[1], headToWorld[2],
-            headToWorld[4], headToWorld[5], headToWorld[6],
-            headToWorld[8], headToWorld[9], headToWorld[10]
-    );
-    Vector3 worldDirection = (rotMat * gazeDirection).normalize();
-
-    // 4. Project out
-    float focusDistance = 25.0f; // Distance in meters
-    Vector3 focusPoint = worldOrigin + (worldDirection * focusDistance);
-
-    return focusPoint;
 }
 
 
@@ -1930,10 +1438,13 @@ void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
     // Ensure mExportPath doesn't already have a trailing slash
     std::string fullPath;
     std::string eyeAppendix;
+    map<int, map<MeteoroidSizeID, map<string, SheetEntry>>> sheet_to_save;
     if (mActiveEye == 1) {
         eyeAppendix = "Right_";
+        sheet_to_save = sheet.m_sheet_right;
     } else if (mActiveEye == 2) {
         eyeAppendix = "Left_";
+        sheet_to_save = sheet.m_sheet_left;
     }
     if (mExportPath.back() == '/') {
         fullPath = mExportPath + eyeAppendix + filename;
@@ -1953,19 +1464,43 @@ void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
     }
 
     // Write CSV Header
-    outFile << "Theta,Phi,SizeIndex\n";
+    outFile << "Longitude,SizeIndex,Points[(PHI,THETA)],NormedValue\n";
 
-    const auto& points = sheet.get_points();
-    const auto& sizes = sheet.get_sizes(); // Assuming you have sizes stored similarly
+    //const auto& points = sheet.get_points();
+    //const auto& sizes = sheet.get_sizes(); // Assuming you have sizes stored similarly
 
-    // Write Data
-    for (size_t i = 0; i < points.size(); ++i) {
-        // Safety check if sizes vector matches points vector
-        std::string sizeStr = (i < sizes.size() && sizes[i]) ? sizes[i]->get_name() : "Unknown Size";
+    auto inn_it = sheet.inner_it;
+    auto mid_it = sheet.middle_it;
+    auto out_it = sheet.outer_it;
 
-        outFile << points[i].theta << ","
-                << points[i].phi << ","
-                << sizeStr << "\n";
+
+    for (out_it = sheet_to_save.begin(); out_it != sheet_to_save.end(); out_it++) {
+        for (mid_it = out_it->second.begin(); mid_it != out_it->second.end(); mid_it++) {
+
+            for (inn_it = mid_it->second.begin(); inn_it != mid_it->second.end(); inn_it++) {
+                auto longitude = out_it->first;
+                MeteoroidSizeID size_id = mid_it->first;
+                string luminance = inn_it->first;
+                auto entry = inn_it->second;
+                AnyMeteoroidSize size = m_size_map.at(size_id);
+                string size_name = std::visit([](auto &&s) {
+                    return s.get_name();
+                }, size);
+
+                // Write Data
+
+                outFile << longitude << ","
+                        << size_name << ","
+                        << luminance << ",[";
+
+                for (auto &val: entry.points) {
+                    outFile << "(" << val.phi
+                            << "|" << val.theta
+                            << ");";
+                }
+                outFile << "]," << entry.normalized_angle << "\n";
+            }
+        }
     }
 
     outFile.close();
