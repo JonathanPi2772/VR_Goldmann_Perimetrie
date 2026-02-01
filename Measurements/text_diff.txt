@@ -1,0 +1,74 @@
+General Right RMSE: 13.109434177942068°
+General Left RMSE: 12.155291351406017°
+Right RMSE for smallest Stimulus I2e: 6.853341885531699
+Left RMSE for smallest Stimulus I2e: 4.404344225290732
+Right RMSE for middle Stimulus I3e: 10.055100979744365
+Left RMSE for middle Stimulus I3e: 9.397642635917448
+Right RMSE for biggest Stimulus V4e: 19.17024889469481
+Left RMSE for biggest Stimulus V4e: 18.31773425796522
+
+Subject 1 Right RMSE for Stimulus 		I2e: 	11.104563717517268
+Subject 1 LEFT RMSE for Stimulus 		I2e: 	8.855731405780228
+Subject 1 Right RMSE for Stimulus 		I3e: 	14.505145238670083
+Subject 1 LEFT RMSE for Stimulus 		I3e: 	12.8292236527864
+Subject 1 Right RMSE for Stimulus 		V4e: 	24.592336317605564
+Subject 1 LEFT RMSE for Stimulus 		V4e: 	22.845922307841665
+
+
+Subject 2 Right RMSE for Stimulus 		I2e: 	14.8521229099121
+Subject 2 LEFT RMSE for Stimulus 		I2e: 	5.895776538895913
+Subject 2 Right RMSE for Stimulus 		I3e: 	9.426029276843572
+Subject 2 LEFT RMSE for Stimulus 		I3e: 	11.526662836500497
+Subject 2 Right RMSE for Stimulus 		V4e: 	16.999552036212513
+Subject 2 LEFT RMSE for Stimulus 		V4e: 	13.985263797821018
+
+
+Subject 3 Right RMSE for Stimulus 		I2e: 	8.802187322000268
+Subject 3 LEFT RMSE for Stimulus 		I2e: 	6.012831098408514
+Subject 3 Right RMSE for Stimulus 		I3e: 	7.96546233324886
+Subject 3 LEFT RMSE for Stimulus 		I3e: 	8.280798305170444
+Subject 3 Right RMSE for Stimulus 		V4e: 	17.86553452757267
+Subject 3 LEFT RMSE for Stimulus 		V4e: 	18.07171954839988
+
+Subject 4 Right RMSE for Stimulus 		I2e: 	7.614220082829544
+Subject 4 LEFT RMSE for Stimulus 		I2e: 	7.181617174323387
+Subject 4 Right RMSE for Stimulus 		I3e: 	8.279521227915728
+Subject 4 LEFT RMSE for Stimulus 		I3e: 	11.16860664712691
+Subject 4 Right RMSE for Stimulus 		V4e: 	18.82314151862405
+Subject 4 LEFT RMSE for Stimulus 		V4e: 	18.05275640305484
+
+Subject 5 Right RMSE for Stimulus 		I2e: 	10.006582909254705
+Subject 5 LEFT RMSE for Stimulus 		I2e: 	7.081718860571213
+Subject 5 Right RMSE for Stimulus 		I3e: 	7.724179566191712
+Subject 5 LEFT RMSE for Stimulus 		I3e: 	8.543052507986062
+Subject 5 Right RMSE for Stimulus 		V4e: 	17.220069165361856
+Subject 5 LEFT RMSE for Stimulus 		V4e: 	17.670178710857304
+
+
+Subject 6 Right RMSE for Stimulus 		I2e: 	14.500844086675118
+Subject 6 LEFT RMSE for Stimulus 		I2e: 	6.245635124243008
+Subject 6 Right RMSE for Stimulus 		I3e: 	13.66114476433918
+Subject 6 LEFT RMSE for Stimulus 		I3e: 	12.238935856101438
+Subject 6 Right RMSE for Stimulus 		V4e: 	24.06035179887243
+Subject 6 LEFT RMSE for Stimulus 		V4e: 	18.67829381518999
+
+Subject 7 Right RMSE for Stimulus 		I2e: 	9.81465896726905
+Subject 7 LEFT RMSE for Stimulus 		I2e: 	10.186082809372481
+Subject 7 Right RMSE for Stimulus 		I3e: 	10.762715298278048
+Subject 7 LEFT RMSE for Stimulus 		I3e: 	11.958038547672558
+Subject 7 Right RMSE for Stimulus 		V4e: 	19.712575776495743
+Subject 7 LEFT RMSE for Stimulus 		V4e: 	20.08207865108298
+
+Subject 8 Right RMSE for Stimulus 		I2e: 	17.926578314826592
+Subject 8 LEFT RMSE for Stimulus 		I2e: 	11.092924716058668
+Subject 8 Right RMSE for Stimulus 		I3e: 	15.743885966681617
+Subject 8 LEFT RMSE for Stimulus 		I3e: 	9.324061973998681
+Subject 8 Right RMSE for Stimulus 		V4e: 	20.349766884133267
+Subject 8 LEFT RMSE for Stimulus 		V4e: 	17.994077029735895
+
+Subject 9 Right RMSE for Stimulus 		I2e: 	7.610355792920834
+Subject 9 LEFT RMSE for Stimulus 		I2e: 	15.636390873075646
+Subject 9 Right RMSE for Stimulus 		I3e: 	10.789915607610364
+Subject 9 LEFT RMSE for Stimulus 		I3e: 	10.825215403640046
+Subject 9 Right RMSE for Stimulus 		V4e: 	19.348165341902156
+Subject 9 LEFT RMSE for Stimulus 		V4e: 	20.663905713566955

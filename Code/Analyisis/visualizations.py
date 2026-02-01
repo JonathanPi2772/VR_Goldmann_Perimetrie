@@ -150,7 +150,7 @@ def parse_and_plot(filename, eye=0, subject_id=0 ):
     # plt.show()
 
 def main():
-    for sub in range(1, 6):
+    for sub in range(8, 10):
         print(os.getcwd())
         path = os.path.join("..", "Measurements", f"Subject{sub}")
         right = os.path.join(path, "Right.csv")
