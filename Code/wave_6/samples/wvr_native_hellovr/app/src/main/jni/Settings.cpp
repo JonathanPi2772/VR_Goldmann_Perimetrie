@@ -48,7 +48,6 @@ const std::vector<PerimetryVector> METEOROID_LONGITUDES_DEG = {
         //PerimetryVector{(3*90)+45, std::vector<double>{90, 90, 90, 90, 90}, std::vector<double>{90, 90, 90, 90, 75}, "1a", MeteoroidSizeID::None},
         PerimetryVector{(3*90)+60, std::vector<double>{90, 90, 90, 90, 85}, std::vector<double>{90, 90, 90, 90, 75}, "1a", MeteoroidSizeID::None},
         //PerimetryVector{(3*90)+75, std::vector<double>{90, 90, 90, 90, 85}, std::vector<double>{90, 90, 90, 90, 75}, "1a", MeteoroidSizeID::None},
-
          };
 const Vector3 METEOROID_COLOR = Vector3(1.0f, 0.0f, 0.0f); //
 const glm::vec3 GENERAL_THALES_POINT = glm::vec3(0.0f, 0.0f, -METEOROID_DISTANCE);

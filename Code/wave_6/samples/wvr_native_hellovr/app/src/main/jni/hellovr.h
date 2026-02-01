@@ -194,9 +194,20 @@ protected:
     std::mt19937 m_rng{ std::random_device{}() };
     int mActiveEye;
     int mFirstEye;
+    // Saving data to sd card
+    // Store fixed file paths for the current session
+    std::string mRightEyeCsvPath;
+    std::string mLeftEyeCsvPath;
+    // Helper to initialize files at start
+    void initPerimetryFiles();
+    // Helper to append a single point
+    void appendPointToCSV(const std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string>& data);
+
+
     Meteoroid* mMeteoroid;
     Picture * mGridPicture;
     //ReticlePointer * mReticlePointer;
+    float gaze_correction = 0.0f;
 
     Matrix4 mWorldTranslation;  // a little backward and upper to avoid been in a cube.
     float mWorldRotation;  // a little backward and upper to avoid been in a cube.

@@ -477,16 +477,21 @@ Meteoroid::CurrentPointInfo Meteoroid::get_current_point_info(bool point_detecte
     }
 }
 
-void Meteoroid::point_detected() {
+std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string> Meteoroid::point_detected() {
     pause_animation(true);
-    if (m_perimetry_status != "paused") return;
+    if (m_perimetry_status != "paused") {
+        auto empty = std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string>{};
+        return empty;
+    };
 
     PerimetryVector cur_vec = m_longitudes[m_current_longitude_index];
 
     m_goldmann_sheet.add_point(m_paused_star_p, m_paused_star_size, cur_vec.angle_deg, mActiveEye, cur_vec.luminance);
 
     m_current_longitude_index++;
-    m_current_size = m_size_map.at(m_longitudes[m_current_longitude_index].size);
+    if (m_current_longitude_index < m_longitudes.size()) {
+        m_current_size = m_size_map.at(m_longitudes[m_current_longitude_index].size);
+    }
     std::visit([this](auto&& s) {
         s.set_distance(m_radius);
     }, m_current_size);
@@ -501,6 +506,8 @@ void Meteoroid::point_detected() {
 
     // Optional: Log it
     LOGI("Point detected! Moving to longitude index: %d", m_current_longitude_index);
+    auto return_value = std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string>{m_paused_star_p, m_paused_star_size, cur_vec.angle_deg, mActiveEye, cur_vec.luminance};
+    return return_value;
 }
 
 // --- Private Python-Helfer, jetzt in C++ ---

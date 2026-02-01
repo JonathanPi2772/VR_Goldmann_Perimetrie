@@ -33,7 +33,7 @@ public:
     void start_animation();
     void pause_animation(bool point_detected);
     void resume_animation();
-    void point_detected();
+    std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string> point_detected();
     void reset_animation();
 
 

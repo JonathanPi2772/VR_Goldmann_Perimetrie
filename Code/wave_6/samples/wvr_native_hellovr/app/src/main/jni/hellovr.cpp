@@ -9,6 +9,7 @@
 // specifications, and documentation provided by HTC to You."
 #include <iostream>
 #include <log.h>
+#include <future>
 #include <string.h>
 #include <unistd.h>
 #include <limits>
@@ -214,8 +215,45 @@ bool MainApplication::initVR() {
 
     mInteractionMode = WVR_GetInteractionMode();
     mGazeTriggerType = WVR_GetGazeTriggerType();
+
+
     LOGI("initVR() mInteractionMode: %d, mGazeTriggerType: %d", mInteractionMode, mGazeTriggerType);
+    //initPerimetryFiles();
     return true;
+}
+
+void MainApplication::initPerimetryFiles() {
+    if (mExportPath.empty()) return;
+
+    // 1. Generate Timestamp ONCE
+    std::time_t t = std::time(nullptr);
+    std::tm* now = std::localtime(&t);
+    char buffer[128];
+    std::strftime(buffer, sizeof(buffer), "perimetry_%Y-%m-%d_%H-%M-%S.csv", now);
+    std::string filename(buffer);
+
+    // 2. Create Paths
+    // Ensure mExportPath has no trailing slash (simplified logic)
+    std::string basePath = mExportPath;
+    if (basePath.back() != '/') basePath += "/";
+
+    mRightEyeCsvPath = basePath + "current_Right_" + filename;
+    mLeftEyeCsvPath = basePath + "current_Left_" + filename;
+
+    // 3. Write Headers for both files
+    auto writeHeader = [](const std::string& path) {
+        std::ofstream outFile(path, std::ios::out);
+        if (outFile.is_open()) {
+            // NormedValue is excluded as requested
+            outFile << "Longitude,SizeIndex,Luminance,Points[(PHI|THETA)]\n";
+            outFile.close();
+        }
+    };
+
+    writeHeader(mRightEyeCsvPath);
+    writeHeader(mLeftEyeCsvPath);
+
+    LOGI("Perimetry files initialized:\n  R: %s\n  L: %s", mRightEyeCsvPath.c_str(), mLeftEyeCsvPath.c_str());
 }
 
 bool MainApplication::initGL() {
@@ -600,9 +638,19 @@ bool MainApplication::handleInput() {
                         (event.input.inputId == WVR_InputId_Alias1_Trigger) or
                         (event.input.inputId == WVR_InputId_Alias1_Touchpad)
                 ) {
-                    if (mMeteoroid->m_perimetry_status == "running")
-                        mMeteoroid->point_detected();
+                    if (mMeteoroid->m_perimetry_status == "running") {
+                        auto resultTuple = mMeteoroid->point_detected();
 
+                        // 2. Save asynchronously to prevent VR stutter
+                        // We pass 'this' and the 'resultTuple' to the helper function
+                        /*
+                        std::thread saverThread([this, resultTuple]() {
+                            this->appendPointToCSV(resultTuple);
+                        });
+                        saverThread.detach();
+                         */
+
+                    }
                     if (mShowRightEyeMenu) {
                         mShowRightEyeMenu = false;
                         mMeteoroid->start_animation();
@@ -643,6 +691,14 @@ bool MainApplication::handleInput() {
                     } else {
                         mShowPauseMenu = true;
                         mMeteoroid->pause_animation(false);
+                    }
+                } else if (event.input.inputId == WVR_InputId_Alias1_B) {
+                    if (gaze_correction < 10.0) {
+                        gaze_correction += 1.0;
+                    }
+                } else if (event.input.inputId == WVR_InputId_Alias1_Y) {
+                    if (gaze_correction > 1.0) {
+                        gaze_correction -= 1.0;
                     }
                 }
             }
@@ -1405,7 +1461,7 @@ void MainApplication::updateEyeTracking() {
         // 8-10 degrees is usually a comfortable "foveal" view.
         // 15+ degrees is very loose.
 
-        if (angle <= MAX_ACCEPTANCE_ANGLE_DEG) {
+        if (angle <= (MAX_ACCEPTANCE_ANGLE_DEG + gaze_correction)) {
             // --- STATE: LOOKING AT SPHERE ---
             mSphere->setSphereColor(Sphere::Color::green); // Renders as Grey/White
 
@@ -1446,10 +1502,10 @@ void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
     std::string eyeAppendix;
     map<int, map<MeteoroidSizeID, map<string, SheetEntry>>> sheet_to_save;
     if (mActiveEye == 1) {
-        eyeAppendix = "Right_";
+        eyeAppendix = "final_Right_";
         sheet_to_save = sheet.m_sheet_right;
     } else if (mActiveEye == 2) {
-        eyeAppendix = "Left_";
+        eyeAppendix = "final_Left_";
         sheet_to_save = sheet.m_sheet_left;
     }
     if (mExportPath.back() == '/') {
@@ -1470,7 +1526,7 @@ void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
     }
 
     // Write CSV Header
-    outFile << "Longitude,SizeIndex,Points[(PHI,THETA)],NormedValue\n";
+    outFile << "Longitude,SizeIndex,Intensity,Points[(PHI,THETA)],NormedValue\n";
 
     //const auto& points = sheet.get_points();
     //const auto& sizes = sheet.get_sizes(); // Assuming you have sizes stored similarly
@@ -1511,6 +1567,58 @@ void MainApplication::savePerimetryData(const GoldmannSheet& sheet) {
 
     outFile.close();
     LOGI("Data saved successfully with timestamp.");
+}
+
+void MainApplication::appendPointToCSV(const std::tuple<PolarPoint, AnyMeteoroidSize, int, int, string>& data) {
+    int eyeID = std::get<3>(data);
+
+    // Select File
+    std::string targetFile;
+    if (eyeID == 1) targetFile = mRightEyeCsvPath;
+    else if (eyeID == 2) targetFile = mLeftEyeCsvPath;
+    else { LOGE("Invalid Eye ID: %d", eyeID); return; }
+
+    if (targetFile.empty()) {
+        LOGE("Target filename is empty! Check initPerimetryFiles.");
+        return;
+    }
+
+    // --- DIAGNOSTIC WRITE ---
+    // Use std::ios::out | std::ios::app to be explicit
+    std::ofstream outFile(targetFile, std::ios::out | std::ios::app | std::ios::ate);
+
+    // Check if OPEN failed
+    if (!outFile.is_open()) {
+        // strerror(errno) will print the ACTUAL OS error (e.g., "Permission denied", "No such file or directory")
+        LOGE("CRITICAL: Failed to open %s. Error: %s", targetFile.c_str(), std::strerror(errno));
+        return;
+    }
+
+    // Extract Data
+    PolarPoint p = std::get<0>(data);
+    AnyMeteoroidSize size = std::get<1>(data);
+    int longitude = std::get<2>(data);
+    string luminance = std::get<4>(data);
+    string size_name = std::visit([](auto &&s) { return s.get_name(); }, size);
+
+    // Write Data
+    outFile << longitude << ","
+            << size_name << ","
+            << luminance << ",[("
+            << p.phi << "|" << p.theta
+            << ");]" << "\n"; // Use \n instead of endl for now
+
+    // 3. FORCE FLUSH to physical disk
+    outFile.flush();
+
+    // Check if WRITE failed
+    if (outFile.fail() || outFile.bad()) {
+        LOGE("CRITICAL: Write operation failed. Error: %s", std::strerror(errno));
+    } else {
+        LOGI("Success: Appended point to %s", targetFile.c_str());
+    }
+
+    outFile.close();
 }
 
 void MainApplication::CloseApplication() {

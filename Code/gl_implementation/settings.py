@@ -67,5 +67,5 @@ class Settings:
         }
         self.meteoroid_speed = 10  # deg/sec
         self.general_thales_point = np.array([0, 0, -self.meteoroid_distance], dtype=float)
-        self.show_meteoroid_way = False
+        self.show_meteoroid_way = True
 
