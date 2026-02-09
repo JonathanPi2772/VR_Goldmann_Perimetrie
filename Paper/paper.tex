@@ -1,0 +1,393 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url} 
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{siunitx}  % For alignment of numbers
+\usepackage{caption}  % For better caption spacing
+\usepackage{booktabs} % Added for better looking tables
+\usepackage{multirow} % Added for table formatting
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+\pagestyle{plain}
+
+\title{Development and Evaluation of a Virtual Reality Kinetic Perimeter using the HTC Vive Focus 3}
+\IEEEaftertitletext{\centering February 2026\\[1.5ex]}
+\date{February 1, 2026}
+
+
+\author{
+    \IEEEauthorblockN{Jonathan Pareja Carrillo}
+    \IEEEauthorblockA{\textit{Student Medical Informatics} \\
+    \textit{HHN Heilbronn}\\
+    Heilbronn, Germany \\
+    jparejacar@stud.hs-heilbronn.de
+    },
+    \and
+    \IEEEauthorblockN{Prof. Dr. rer. nat.\\ Alexandra Reichenbach}
+    \IEEEauthorblockA{\textit{Institute for Medical Informatics} \\
+    \textit{HHN Heilbronn}\\
+    Heilbronn, Germany \\
+    alexandra.reichenbach@hs-heilbronn.de
+    }
+    \and
+    \IEEEauthorblockN{Prof. Dr. med. \\Ina Conrad-Hengerer, FEBO}
+    \IEEEauthorblockA{\textit{Universitätsklinikum Heidelberg} \\
+    Heidelberg, Germany \\
+    ina.conrad-hengerer@med.uni-heidelberg.de
+    }
+    \\[2ex]
+    \and
+    \IEEEauthorblockN{Dr. med. Lucy Kessler}
+    \IEEEauthorblockA{\textit{Universitätsklinikum Heidelberg} \\
+    Heidelberg, Germany \\
+    LucyJoanne.Kessler@med.uni-heidelberg.de
+    }
+    \and
+    \IEEEauthorblockN{Prof. Dr.-Ing. Gerrit Meixner}
+    \IEEEauthorblockA{\textit{UniTyLab, HHN Heilbronn} \\
+    Heilbronn, Germany \\
+    gerrit.meixner@hs-heilbronn.de
+    }
+}
+\maketitle
+
+\begin{abstract}
+Visual field testing (perimetry) is essential for diagnosing damage to the retina and optic nerve. The current clinical gold standard for kinetic perimetry, the Goldmann perimeter, relies on bulky, expensive hardware and requires manual operation by trained medical staff. This paper presents the design, implementation, and evaluation of a digital kinetic perimetry system using a Virtual Reality (VR) headset (HTC Vive Focus 3) with integrated eye-tracking. The system aims to replicate standard Goldmann stimuli (sizes V to I) and intensities on a mobile platform.
+We conducted a pilot study with $N=9$ healthy subjects to evaluate the accuracy of the VR system compared to expected physiological norms, targeting a Root Mean Squared Error (RMSE) deviation of less than $5^{\circ}$.
+Results indicate that while the geometric implementation of meridians and stimulus movement is functional, the system currently suffers from luminance calibration issues, leading to lower sensitivity compared to standard values. The study highlights critical challenges in VR perimetry and providing a roadmap for future mobile diagnostic tools.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Virtual Reality, Kinetic Perimetry, Goldmann Perimeter, Ophthalmology, Eye-Tracking, HTC Vive Focus 3.
+\end{IEEEkeywords}
+
+\section{Introduction}
+Perimetry is a method for systematically measuring the visual field to detect dysfunction in central and peripheral vision. It is a standard diagnostic procedure for glaucoma, optic nerve damage, and other retinal pathologies \cite{racette2018visual}. Since visual field loss cannot be measured objectively without patient feedback, perimetry remains a subjective psychophysical test.
+
+Currently, the clinical standard for kinetic perimetry relies on the Goldmann Perimeter, developed by Hans Goldmann in 1945 \cite{goldmann1945}. In this method, a stimulus (light spot) of varying size and intensity is moved from the non-seeing periphery towards the center of a hemispherical bowl until the patient perceives it. While effective, the Goldmann perimeter has significant drawbacks: it is large, immobile, requires a dedicated darkroom, and necessitates a trained operator to manually move the projector arm. These factors make the procedure labor-intensive and costly.
+
+The objective of this project is to digitize and automate kinetic perimetry using a standalone Virtual Reality (VR) headset. By leveraging the immersive capabilities and built-in eye-tracking of the HTC Vive Focus 3, we aim to create a portable, cost-effective alternative that yields results comparable to the standardized Goldmann perimeter. This paper details the hardware considerations, software implementation using OpenGL, and the results of a pilot study with healthy volunteers.
+
+\section{Background and Requirements}
+
+\subsection{Principles of Kinetic Perimetry}
+In kinetic perimetry, the visual field boundaries are mapped by moving a stimulus along defined meridians. The points at which the stimulus becomes visible define an \textit{isopter}—a line connecting points of equal retinal sensitivity. Standardized automation, such as that seen in the Octopus perimeter, has shown that digital systems can replicate manual Goldmann results while improving workflow consistency \cite{racette2018visual}.
+
+\subsection{Standardization Parameters}
+To ensure comparability, the proposed VR system must replicate the Goldmann standards regarding stimulus size, intensity, and background luminance.
+
+\subsubsection{Stimulus Size}
+Goldmann stimuli range from Size I to V. The projected area $A$ and the angular diameter are standardized based on a cupola radius of $r = 30$ cm. Table \ref{tab:sizes} summarizes these values as defined in standard perimetry literature \cite{racette2018visual}.
+
+\begin{table}[htbp]
+\caption{Goldmann Stimulus Sizes \cite{racette2018visual}}
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+\textbf{Goldmann Size} & \textbf{Diameter ($^\circ$)} & \textbf{Area (mm$^2$)} & \textbf{Typical Use} \\
+\midrule
+I & 0.11 & 0.25 & Central / Blind Spot \\
+II & 0.22 & 1.00 & Paracentral \\
+III & 0.43 & 4.00 & Standard Static \\
+IV & 0.86 & 16.00 & Peripheral \\
+V & 1.72 & 64.00 & Low Vision \\
+\bottomrule
+\end{tabular}
+\label{tab:sizes}
+\end{center}
+\end{table}
+
+\subsubsection{Stimulus Intensity}
+The maximum luminance of a Goldmann stimulus is defined as 1000 apostilbs (asb), which corresponds to approximately $315 \text{ cd/m}^2$ (nits). Intensity is modulated using filters, denoted by a decibel (dB) attenuation scale. The luminance $L$ of a stimulus is given by:
+\begin{equation}
+L(s) = L_{max} \cdot 10^{-x/10} + L_{bg}
+\label{eq:luminance}
+\end{equation}
+Where $L_{max} = 315 \text{ cd/m}^2$, $x$ is the attenuation in dB, and $L_{bg}$ is the background luminance (typically $31.5 \text{ asb}$ or $10 \text{ cd/m}^2$).
+
+Standard filters are designated by numbers (1-4) for 5 dB steps and letters (a-e) for 1 dB steps \cite{racette2018visual}. Table \ref{tab:intensity} details the standard intensity codes used in this implementation.
+
+\begin{table}[htbp]
+\caption{Goldmann Stimulus Intensities \cite{racette2018visual}}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Intensity Code} & \textbf{Attenuation (dB)} & \textbf{Max Luminance (asb)} \\
+\midrule
+4e & 0 & 1000 \\
+3e & 5 & 315 \\
+2e & 10 & 100 \\
+1e & 15 & 31.5 \\
+1a & 19 & 12.5 \\
+\bottomrule
+\multicolumn{3}{l}{\footnotesize Note: 1000 asb $\approx$ 315 cd/m$^2$. Background is 31.5 asb.}
+\end{tabular}
+\label{tab:intensity}
+\end{center}
+\end{table}
+
+\section{System Implementation}
+
+\subsection{Hardware and SDK Selection}
+The system was implemented on the HTC Vive Focus 3. This headset was selected for its standalone capabilities and integrated eye-tracker, which is crucial for monitoring patient fixation.
+Initially, OpenXR \cite{khronos_openxr_styleguide} was considered for development to ensure cross-platform compatibility. However, due to complexities in integrating the eye-tracking data and rendering stimuli for monocular testing via OpenXR, the proprietary native HTC Wave SDK\cite{vive_native_sdk} was utilized. This allowed for granular control over the rendering pipeline and eye-tracking data access.
+
+\subsection{Coordinate Systems and Rendering}
+Visualizing perimetry results typically uses 2D polar coordinates, but the VR simulation requires a 3D spherical coordinate system. The stimulus position is defined by $\theta$ (position on the meridian) and $\phi$ (angle of the meridian).
+Since the standard spherical pole (zenith) corresponds to $\theta = 0$, a rotation was applied so that the fixation point (center of the visual field) aligns with the user's forward gaze vector $(0,0,-1)$.
+
+The application was developed using in three stages. First Python with Matplotlib for visualization. Second also python for the math and OpenGL for rendering (Figure \ref{fig:opengl_render} shows the working OpenGL Implementation) and third on the VR-Glasses with C++ and Java and OpenGL ES for Rendering. The Implementation strategy was based on the Design-Thinking-Process \cite{WikipediaDesignThinking}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.22]{imgs/python_proto.png}
+\caption{Visualization of the virtual perimetry bowl and stimulus trajectory.}
+\label{fig:opengl_render}
+\end{figure}
+
+\subsection{Challenges in Implementation}
+
+\subsubsection{Spatial Scale and Units}
+OpenGL uses unitless coordinates. Unlike Mixed Reality applications where spatial anchors provide metric accuracy \cite{ms_coords}, the Vive Focus 3 documentation does not explicitly define the unit scale. We assumed a metric scaling factor within the rendering pipeline. To mitigate parallax errors caused by the Inter-Pupillary Distance (IPD) when viewing a virtual object at 30 cm (standard Goldmann radius), the virtual radius was scaled up to 50 units (meters). This ensures that the angular size of the stimulus remains consistent regardless of minor IPD variations.
+
+\subsubsection{Luminance and Color Calibration}
+Replicating the exact photometric brightness of Goldmann stimuli (up to 315 nits) is a significant challenge in VR. The Vive Focus 3 display specifications regarding maximum luminance are not public; community estimates suggest a range of 100--200 nits.
+Furthermore, displays use RGB values (0--255), which do not scale linearly with human brightness perception. We applied a gamma correction of $\gamma = 2.2$ to map the physical luminance requirements to RGB values:
+\begin{equation}
+RGB_{val} = 255 \cdot \left( \frac{L_{target}}{L_{max\_display}} \right)^{1/\gamma}
+\end{equation}
+For this study, $L_{max\_display}$ was estimated at 150 nits. Due to the Fresnel lens optics, luminance uniformity across the field of view is also variable, making precise calibration difficult without specialized hardware.
+
+\subsubsection{Fixation and Eye Tracking}
+In clinical perimetry, a chin rest restricts head movement. In this VR implementation, users were seated but not mechanically restrained. To compensate, the system utilized the eye-tracker. The test paused if the user's gaze deviated more than $6^{\circ}$ from the central fixation point. This threshold was empirically determined; narrower thresholds caused excessive interruptions for some subjects.
+
+\section{Study Design}
+
+\subsection{Ethics and Participants}
+Due to time constraints and regulatory requirements, approval was granted by the Ethics Committee in Heilbronn for testing on healthy volunteers only. The study included $N=9$ participants. The sample size was calculated based on $\alpha = 0.05$, $\beta = 0.02$, variance $S_d^2 = 6.01$, and a detectable difference $\delta = 5^{\circ}$, resulting in a required $n \approx 9$.
+Five participants were under 30 years old, one was aged 30--40, and three were aged 50--60.
+
+\subsection{Procedure}
+Participants underwent calibration for IPD and eye-tracking. The application tested both eyes (sequence randomized).
+\begin{itemize}
+    \item \textbf{Stimuli:} V4e, III4e, and I2e. V4e was used for familiarization.
+    \item \textbf{Meridians:} 12 meridians at $30^\circ$ intervals ($0^\circ, 30^\circ, \dots, 330^\circ$).
+    \item \textbf{Repetitions:} Each stimulus was shown twice per meridian.
+    \item \textbf{Total:} 72 distinct stimulus events per eye.
+    \item \textbf{Duration:} Approximately 30 minutes per subject.
+\end{itemize}
+
+\subsection{Data Processing}
+To ensure the spatial accuracy of the recorded isopters, it is necessary to account for the latency between the subject's visual perception of the stimulus and the physical actuation of the controller trigger. We applied a reaction time correction of 0.5 seconds. For every recorded button press, the system back-calculated the position of the moving stimulus 0.5 seconds prior to the timestamp of the event. This corrected position was stored as the true threshold point. \\
+\\
+Because of the limited field of view, the participants are not able to see stimuli thats distance is more than 75 degree to the center. So for the analysis, all those detected thresholds are removed (Count of detected stimuli is reduced from 1294 to 1252). The raw data with all the detected points, is provided with the paper, for every subject. 
+
+\section{Results}
+
+\subsection{Isopter Visualization}
+The recorded isopters for the VR system were plotted against the standard Goldmann ground truth values derived from the Grobbel et al. model\cite{10.1167/tvst.5.2.5}. Figure \ref{fig:ground_truth} shows the idealized ground truth for the Left Eye, while Figure \ref{fig:mean_results} displays the averaged results from the study participants.
+
+\begin{figure}[htbp]
+  \centering
+\includegraphics[scale=0.35]{imgs/ground_left.png}
+  \caption{Clinical Goldmann Perimetry Ground Truth (Left Eye). The outer green line represents V4e, orange III4e, and blue I2e.}
+  \label{fig:ground_truth}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.35]{imgs/all_left.png}
+  \caption{Averaged Isopters for all subjects (Left Eye).}
+  \label{fig:mean_results}
+\end{figure}
+
+Visually, the recorded VR isopters (Figure \ref{fig:mean_results}) follow the general contour of the physiological norms but are notably constricted. The isopters appear closer to the center than expected, indicating that subjects detected the stimuli later (i.e., when the stimulus was closer to the fovea) than in standard Goldmann perimetry.
+
+\subsection{Quantitative Analysis}
+We calculated the Root Mean Square Error (RMSE) in degrees for each stimulus intensity across all meridians. Table \ref{tab:rmse_results} summarizes the global RMSE for the Right and Left eyes, as well as the breakdown per stimulus type.
+
+\begin{table}[htbp]
+\caption{RMSE Comparison (VR vs. Goldmann Standard)}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Stimulus} & \textbf{Right Eye ($^\circ$)} & \textbf{Left Eye ($^\circ$)} \\
+\midrule
+\multirow{3}{*}{Specific RMSE} & I2e & 6.86 & 4.40 \\
+ & I3e & 10.06 & 9.40 \\
+ & V4e & 19.17 & 18.31 \\
+\midrule
+\textbf{General RMSE} & \textbf{All} & \textbf{13.11} & \textbf{12.16} \\
+\bottomrule
+\end{tabular}
+\label{tab:rmse_results}
+\end{center}
+\end{table}
+
+The general RMSE for the Right eye was $13.11^{\circ}$ and $12.16^{\circ}$ for the Left eye. The smallest stimulus (I2e) showed the lowest deviation, particularly in the Left eye ($3.37^{\circ}$). Conversely, the largest and most peripheral stimulus (V4e) exhibited the highest error, exceeding $19^{\circ}$ in the Right eye. All other Analysis-Data will be made available as Jupiter Notebook with this paper.   
+
+\section{Discussion}
+
+\subsection{Accuracy and Deviations}
+The primary metric for validation was a Mean Squared Error (MSE) of $< 5^{\circ}$ compared to standard physiological norms. Based on the General RMSE values ($>12^{\circ}$), this hypothesis could not be confirmed for the aggregate data. However, the specific performance of the I2e stimulus in the Left eye ($3.37^{\circ}$) suggests that central field testing may be achievable within the desired accuracy range.
+
+The qualitative constriction of the isopters implies a systematic reduction in sensitivity, that could derive from  various causes. 
+
+\subsection{Hardware Limitations}
+\subsubsection{Field of View (FOV)}
+The Vive Focus 3 has a horizontal FOV of approximately $120^{\circ}$ \cite{vivefocus3}. Testing the full visual field requires a broader stimulus range than currently provided. User-perceived field-of-view (FOV) limitations within the headset environment are the probable cause for the diminished accuracy of the outer isopter data.
+
+
+\subsection{Luminance and Contrast Ratios}
+The high RMSE values for the peripheral V4e stimulus ($19.17^{\circ}$ Right, $18.31^{\circ}$ Left) are likely attributed to the limitations of the VR display's brightness. In Goldmann perimetry, the V4e stimulus is conventionally employed to map the far periphery. However, the estimated peak luminance of the hardware is approximately 150 nits, which appears to be an overestimation of actual performance. The stimuli are likely presented at sub-threshold levels. Consequently, both V4e and I3e stimuli may remain undetected until they have transitioned significantly toward the central visual field.
+
+\subsection{Head Fixation}
+Despite eye-tracking, the lack of a chin rest introduced head translations. While gaze direction is vector-based, translations of the head center change the effective visual angle of the projected sphere. Future iterations must implement software-based compensation to reposition the virtual sphere relative to the eye position dynamically.
+
+\subsection{Participants and Data Quality}
+During the evaluation, certain participant behaviors impacted the consistency of the results. Specifically, several subjects exhibited high response frequencies despite system-imposed input restrictions. Because the current software architecture requires active visual fixation before registering an input, repeated button presses during focus loss led to the recording of "false positive" detections. These data points—where stimuli were reportedly detected in peripheral areas logically inconsistent with the subject’s visual field—represent significant deviations from physiological reality. The current algorithm does not yet include a filter to automatically suppress these redundant or erroneous inputs.\\
+\\
+Furthermore, the data from specific subjects (notably Participants 2, 7, and 8) suggested the presence of previously undiagnosed ocular pathologies. As this study aimed to establish a baseline for standard kinetic perimetry, the inclusion of results from non-healthy eyes introduces confounding variables, thereby reducing the overall reliability of the comparative analysis.
+\section{Conclusion and Future Work}
+This work demonstrated the feasibility of implementing kinetic perimetry on a standalone VR headset. While the system successfully automated the stimulus trajectory and user interaction, the photometric accuracy failed to meet the Goldmann equivalence standard, primarily due to display luminance limitations.
+
+For clinical viability, future work must address:
+\begin{enumerate}
+    \item \textbf{Photometric Calibration:} Using a colorimeter to measure the exact luminance curve of the VR display through the lenses.
+    \item \textbf{Dynamic Algorithms:} Implementing logic to verify "seen" points by re-testing (3+ repetitions) if the deviation between the first two inputs is high. Also an input delay would help to avoid the participants clicking often in a row, because they think the input was not captured. 
+    \item \textbf{Efficiency:} Skipping areas outside the headset's FOV to reduce test duration.
+\end{enumerate}
+Despite current limitations, VR perimetry offers a promising path toward decentralized, cost-effective screening, provided that hardware specifications regarding brightness and contrast can be standardized.
+\section*{Declaration of Generative AI and AI-assisted technologies}
+
+During the preparation of this work, the authors used Google Gemini in order to improve the language and readability of the manuscript and supported the developers in the creation of the application. After using this tool/service, the authors reviewed and edited the content as needed and take full responsibility for the content of the publication.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\clearpage
+\onecolumn
+\section{Appendix:}
+\subsection{Visualization of the VR-Perimetry results for all nine participants:}
+
+\begin{figure}[h] % The '*' spans both columns; 'p' puts it on its own page
+    \centering
+    
+    % Row 1
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/1_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/2_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/3_R.png}
+    \end{subfigure}
+
+    \vspace{1cm}
+
+    % Row 2
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/4_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/5_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/6_R.png}
+    \end{subfigure}
+
+    \vspace{1cm}
+
+    % Row 3
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/7_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/8_R.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/9_R.png}
+    \end{subfigure}
+
+    \caption{Right Eye VR-Perimetry Results for all Nine Patients}
+\end{figure}
+
+\begin{figure}[h] % The '*' spans both columns; 'p' puts it on its own page
+    \centering
+    
+    % Row 1
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/1_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/2_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/3_L.png}
+    \end{subfigure}
+
+    \vspace{1cm}
+
+    % Row 2
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/4_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/5_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/6_L.png}
+    \end{subfigure}
+
+    \vspace{1cm}
+
+    % Row 3
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/7_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/8_L.png}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\linewidth]{imgs/9_L.png}
+    \end{subfigure}
+
+    \caption{Left Eye VR-Perimetry Results for all Nine Patients}
+\end{figure}
+\clearpage
+\subsection{RMSE for Each Subject on each Eye for Each Stimulus Size}
+\begin{table}[h]
+    \centering
+    \caption{Individual Subject RMSE Values by Stimulus ($^\circ$)}
+    \label{tab:rmse_individual}
+    % Columns: Subject | I2e Right/Left | I3e Right/Left | V4e Right/Left
+    \begin{tabular}{c *{6}{S[table-format=2.2]}}
+        \toprule
+        & \multicolumn{2}{c}{\textbf{Stimulus I2e}} & \multicolumn{2}{c}{\textbf{Stimulus I3e}} & \multicolumn{2}{c}{\textbf{Stimulus V4e}} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+        \textbf{Subject} & {Right} & {Left} & {Right} & {Left} & {Right} & {Left} \\
+        \midrule
+        1 & 11.10 & 8.86 & 14.51 & 12.83 & 24.59 & 22.85 \\
+        2 & 14.85 & 5.90 & 9.43 & 11.53 & 17.00 & 13.99 \\
+        3 & 8.80 & 6.01 & 7.97 & 8.28 & 17.87 & 18.07 \\
+        4 & 7.61 & 7.18 & 8.28 & 11.17 & 18.82 & 18.05 \\
+        5 & 10.01 & 7.08 & 7.72 & 8.54 & 17.22 & 17.67 \\
+        6 & 14.50 & 6.25 & 13.66 & 12.24 & 24.06 & 18.68 \\
+        7 & 9.81 & 10.19 & 10.76 & 11.96 & 19.71 & 20.08 \\
+        8 & 17.93 & 11.09 & 15.74 & 9.32 & 20.35 & 17.99 \\
+        9 & 7.61 & 15.64 & 10.79 & 10.83 & 19.35 & 20.66 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\end{document}
