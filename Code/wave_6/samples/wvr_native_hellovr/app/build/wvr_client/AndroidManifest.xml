@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.htc.vr.client.bootstrap" >
+
+    <uses-sdk android:minSdkVersion="29" />
+
+    <queries>
+        <package android:name="com.htc.vr.core.server" />
+
+        <intent>
+            <action android:name="com.htc.vr.intent.action.device" />
+        </intent>
+    </queries>
+
+    <application
+        android:theme="@style/Theme.WaveVR.Black"
+        tools:replace="android:theme" >
+    </application>
+
+</manifest>

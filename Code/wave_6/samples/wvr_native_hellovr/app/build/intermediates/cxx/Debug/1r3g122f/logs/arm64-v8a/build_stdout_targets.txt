@@ -1,0 +1,3 @@
+[arm64-v8a] Compile++      : hellovr_common <= hellovr.cpp
+[arm64-v8a] SharedLibrary  : libhellovr_common.so
+[arm64-v8a] SharedLibrary  : libhellovr_jni.so

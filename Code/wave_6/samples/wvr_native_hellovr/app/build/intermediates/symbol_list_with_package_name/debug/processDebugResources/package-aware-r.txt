@@ -1,0 +1,15 @@
+com.htc.vr.samples.wvr_hellovr
+anim fade_in
+anim fade_out
+dimen activity_horizontal_margin
+dimen activity_vertical_margin
+mipmap ic_launcher
+mipmap jni_icon
+mipmap purenative_icon
+mipmap singlebuffer_icon
+string app_name
+string main_activity
+string wvr_vr_mode_component
+style Animation_Activity_fade_in_out
+style AppTheme
+style Theme_WaveVR_Black

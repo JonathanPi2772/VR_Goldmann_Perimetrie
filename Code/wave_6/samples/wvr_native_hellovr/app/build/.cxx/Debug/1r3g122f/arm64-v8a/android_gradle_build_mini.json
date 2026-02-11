@@ -1,0 +1,78 @@
+{
+  "buildFiles": [
+    "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk",
+    "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/jonathanpi27/Library/Android/sdk/ndk/28.2.13676358/ndk-build",
+      "NDK_PROJECT_PATH\u003dnull",
+      "APP_BUILD_SCRIPT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk",
+      "NDK_APPLICATION_MK\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk",
+      "APP_ABI\u003darm64-v8a",
+      "NDK_ALL_ABIS\u003darm64-v8a",
+      "APP_PLATFORM\u003dandroid-29",
+      "NDK_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj",
+      "NDK_LIBS_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/lib",
+      "VR_SDK_ROOT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/wvr_client",
+      "NDK_DEBUG\u003d1",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/jonathanpi27/Library/Android/sdk/ndk/28.2.13676358/ndk-build",
+    "NDK_PROJECT_PATH\u003dnull",
+    "APP_BUILD_SCRIPT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk",
+    "NDK_APPLICATION_MK\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk",
+    "APP_ABI\u003darm64-v8a",
+    "NDK_ALL_ABIS\u003darm64-v8a",
+    "APP_PLATFORM\u003dandroid-29",
+    "NDK_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj",
+    "NDK_LIBS_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/lib",
+    "VR_SDK_ROOT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/wvr_client",
+    "NDK_DEBUG\u003d1",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "hellovr_common-debug-arm64-v8a": {
+      "artifactName": "hellovr_common",
+      "buildCommandComponents": [
+        "/Users/jonathanpi27/Library/Android/sdk/ndk/28.2.13676358/ndk-build",
+        "NDK_PROJECT_PATH\u003dnull",
+        "APP_BUILD_SCRIPT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk",
+        "NDK_APPLICATION_MK\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk",
+        "APP_ABI\u003darm64-v8a",
+        "NDK_ALL_ABIS\u003darm64-v8a",
+        "APP_PLATFORM\u003dandroid-29",
+        "NDK_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj",
+        "NDK_LIBS_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/lib",
+        "VR_SDK_ROOT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/wvr_client",
+        "NDK_DEBUG\u003d1",
+        "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj/local/arm64-v8a/libhellovr_common.so"
+      ],
+      "abi": "arm64-v8a",
+      "output": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj/local/arm64-v8a/libhellovr_common.so",
+      "runtimeFiles": []
+    },
+    "hellovr_jni-debug-arm64-v8a": {
+      "artifactName": "hellovr_jni",
+      "buildCommandComponents": [
+        "/Users/jonathanpi27/Library/Android/sdk/ndk/28.2.13676358/ndk-build",
+        "NDK_PROJECT_PATH\u003dnull",
+        "APP_BUILD_SCRIPT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk",
+        "NDK_APPLICATION_MK\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk",
+        "APP_ABI\u003darm64-v8a",
+        "NDK_ALL_ABIS\u003darm64-v8a",
+        "APP_PLATFORM\u003dandroid-29",
+        "NDK_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj",
+        "NDK_LIBS_OUT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/lib",
+        "VR_SDK_ROOT\u003d/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/wvr_client",
+        "NDK_DEBUG\u003d1",
+        "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj/local/arm64-v8a/libhellovr_jni.so"
+      ],
+      "abi": "arm64-v8a",
+      "output": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/1r3g122f/obj/local/arm64-v8a/libhellovr_jni.so",
+      "runtimeFiles": []
+    }
+  }
+}

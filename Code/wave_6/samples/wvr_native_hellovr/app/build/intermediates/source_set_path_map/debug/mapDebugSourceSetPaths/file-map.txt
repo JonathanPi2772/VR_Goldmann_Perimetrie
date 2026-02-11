@@ -1,0 +1,9 @@
+com.htc.vr.samples.wvr_hellovr.app-wvr_client-6.2.0-0 /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/res
+com.htc.vr.samples.wvr_hellovr.app-pngs-1 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/generated/res/pngs/debug
+com.htc.vr.samples.wvr_hellovr.app-resValues-2 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/generated/res/resValues/debug
+com.htc.vr.samples.wvr_hellovr.app-updated_navigation_xml-3 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/generated/updated_navigation_xml/debug
+com.htc.vr.samples.wvr_hellovr.app-packageDebugResources-4 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.htc.vr.samples.wvr_hellovr.app-packageDebugResources-5 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.htc.vr.samples.wvr_hellovr.app-debug-6 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/merged_res/debug/mergeDebugResources
+com.htc.vr.samples.wvr_hellovr.app-debug-7 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/debug/res
+com.htc.vr.samples.wvr_hellovr.app-main-8 /Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res

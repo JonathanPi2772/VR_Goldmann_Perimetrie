@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.htc.vr.samples.wvr_hellovr.app-mergeDebugResources-3:/values-v21/values-v21.xml",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values-v21/styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "3",
+                        "endColumns": "12",
+                        "endOffsets": "129"
+                    }
+                }
+            ]
+        }
+    ]
+}

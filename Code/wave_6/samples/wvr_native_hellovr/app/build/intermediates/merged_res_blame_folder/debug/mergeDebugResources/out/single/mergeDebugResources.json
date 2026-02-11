@@ -1,0 +1,82 @@
+[
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-mdpi_purenative_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-mdpi/purenative_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxhdpi_jni_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxhdpi/jni_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xhdpi_singlebuffer_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xhdpi/singlebuffer_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xhdpi_jni_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xhdpi/jni_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxhdpi_singlebuffer_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxhdpi/singlebuffer_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-hdpi_purenative_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-hdpi/purenative_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxxhdpi_singlebuffer_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxxhdpi/singlebuffer_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xhdpi_purenative_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xhdpi/purenative_icon.png"
+    },
+    {
+        "merged": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-mdpi_singlebuffer_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-mdpi/singlebuffer_icon.png"
+    },
+    {
+        "merged": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxxhdpi_jni_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxxhdpi/jni_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxxhdpi_purenative_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxxhdpi/purenative_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-hdpi_jni_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-hdpi/jni_icon.png"
+    },
+    {
+        "merged": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-mdpi_jni_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-mdpi/jni_icon.png"
+    },
+    {
+        "merged": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-hdpi_singlebuffer_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-hdpi/singlebuffer_icon.png"
+    },
+    {
+        "merged": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxhdpi_purenative_icon.png.flat",
+        "source": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxhdpi/purenative_icon.png"
+    },
+    {
+        "merged": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.htc.vr.samples.wvr_hellovr.app-main-7:/mipmap-xxxhdpi/ic_launcher.png"
+    }
+]

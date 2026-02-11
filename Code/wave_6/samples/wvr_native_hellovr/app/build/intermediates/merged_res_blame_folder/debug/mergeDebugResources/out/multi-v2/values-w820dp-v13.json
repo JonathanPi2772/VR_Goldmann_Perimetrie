@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.htc.vr.samples.wvr_hellovr.app-mergeDebugResources-3:/values-w820dp-v13/values-w820dp-v13.xml",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values-w820dp/dimens.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "4",
+                        "startOffsets": "291",
+                        "endColumns": "57",
+                        "endOffsets": "344"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "57",
+                        "endOffsets": "108"
+                    }
+                }
+            ]
+        }
+    ]
+}

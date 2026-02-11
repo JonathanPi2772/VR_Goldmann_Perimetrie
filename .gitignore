@@ -1,0 +1,98 @@
+--- Android / Gradle ---
+
+Build-Ordner und generierte Dateien
+
+build/
+bin/
+gen/
+out/
+.gradle/
+app/build/
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+Lokale Konfiguration (enthält oft SDK-Pfade)
+
+local.properties
+
+Keystore-Dateien (Sicherheit!)
+
+*.jks
+*.keystore
+
+--- Python ---
+
+Bytecode-Cache
+
+pycache/
+*.py[cod]
+*$py.class
+
+Virtuelle Umgebungen
+
+.venv/
+venv/
+ENV/
+env/
+build/
+dist/
+*.egg-info/
+
+Tests und Coverage
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+--- IDEs / Editoren ---
+
+IntelliJ / Android Studio
+
+.idea/
+*.iml
+*.iws
+
+Visual Studio Code
+
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+Andere Editoren
+
+*.swp
+*.bak
+*~
+
+--- Betriebssysteme ---
+
+macOS
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Windows
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+desktop.ini
+
+Linux
+
+.fuse_hidden
+.directory
+.Trash-*
+
+--- Protokolle und Logs ---
+
+.log
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*

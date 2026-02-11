@@ -1,0 +1,2 @@
+/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk
+/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk

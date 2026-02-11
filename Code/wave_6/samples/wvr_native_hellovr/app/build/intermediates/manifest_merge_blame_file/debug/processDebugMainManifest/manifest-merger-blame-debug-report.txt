@@ -1,0 +1,135 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.htc.vr.samples.wvr_hellovr"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="29"
+9        android:targetSdkVersion="29" />
+10
+11    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+11-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:4:5-81
+11-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:4:22-78
+12    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+12-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:5:5-80
+12-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:5:22-77
+13
+14    <uses-feature android:name="android.hardware.usb.host" />
+14-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:6:5-61
+14-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:6:19-59
+15    <uses-feature
+15-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:47:5-86
+16        android:name="wave.feature.handtracking"
+16-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:47:19-59
+17        android:required="true" />
+17-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:47:60-83
+18    <uses-feature android:glEsVersion="0x00030000" />
+18-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:48:5-54
+18-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:48:19-51
+19    <uses-feature
+19-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:49:5-51:35
+20        android:name="wave.feature.eyetracking"
+20-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:50:9-48
+21        android:required="true" />
+21-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:51:9-32
+22
+23    <queries>
+23-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:8:5-14:15
+24        <package android:name="com.htc.vr.core.server" />
+24-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:9:9-58
+24-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:9:18-55
+25
+26        <intent>
+26-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:11:9-13:18
+27            <action android:name="com.htc.vr.intent.action.device" />
+27-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:12:13-70
+27-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:12:21-67
+28        </intent>
+29    </queries>
+30
+31    <application
+31-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:7:5-46:19
+32        android:debuggable="true"
+33        android:extractNativeLibs="false"
+34        android:icon="@mipmap/ic_launcher"
+34-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:8:9-43
+35        android:label="@string/app_name"
+35-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:9:9-41
+36        android:testOnly="true"
+37        android:theme="@style/Theme.WaveVR.Black" >
+37-->[com.htc.vr:wvr_client:6.2.0] /Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/AndroidManifest.xml:17:9-50
+38        <meta-data
+38-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:9-73
+39            android:name="minWaveSDKVersion"
+39-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:20-52
+40            android:value="1" />
+40-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:53-70
+41
+42        <activity
+42-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:12:9-25:20
+43            android:name="com.htc.vr.samples.wvr_hellovr.MainActivity"
+43-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:12:19-77
+44            android:configChanges="density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen"
+44-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:15:13-194
+45            android:enableVrMode="@string/wvr_vr_mode_component"
+45-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:16:13-65
+46            android:label="@string/main_activity"
+46-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:13:13-50
+47            android:launchMode="singleTask"
+47-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:14:13-44
+48            android:screenOrientation="landscape" >
+48-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:17:13-50
+49            <intent-filter>
+49-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:20:13-24:29
+50                <action android:name="android.intent.action.MAIN" />
+50-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:21:17-69
+50-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:21:25-66
+51
+52                <category android:name="android.intent.category.LAUNCHER" />
+52-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:22:17-77
+52-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:22:27-74
+53                <category android:name="com.htc.intent.category.VRAPP" />
+53-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:23:17-74
+53-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:23:27-71
+54            </intent-filter>
+55        </activity>
+56
+57        <!-- Please consider the DoF support of HMD and controller individually for your content. -->
+58        <!-- Set value “3DoF” if your content only considers the rotation pose. -->
+59        <!-- Set value “6DoF” if your content considers both rotation and position pose. -->
+60        <!-- Set value “3,6DoF” if your content is capable of supporting both 3 and 6 DoF playing. -->
+61        <meta-data
+61-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:35:9-88
+62            android:name="com.htc.vr.content.NumDoFHmd"
+62-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:35:20-63
+63            android:value="3,6DoF" />
+63-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:35:64-86
+64        <meta-data
+64-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:36:9-95
+65            android:name="com.htc.vr.content.NumDoFController"
+65-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:36:20-70
+66            android:value="3,6DoF" />
+66-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:36:71-93
+67
+68        <!-- The value could be 0, 1 or 2. Use comma(,) between value if your content can support multiple cases. -->
+69        <!-- Set value “0” if your content supports gaze mode only. -->
+70        <!-- Set value “1” if your content only supports playing with one controler. -->
+71        <!-- Set value “1,2” if your content supports playing with either one controler or two controlers. -->
+72        <!-- Set value “0,1,2” if your content supports all cases, which mean user can play by gaze mode, one controller or two controllers. -->
+73        <meta-data
+73-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:43:9-89
+74            android:name="com.htc.vr.content.NumController"
+74-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:43:20-67
+75            android:value="1,2" /> <!-- fill the value of how many controllers the application can support. -->
+75-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:43:68-87
+76
+77        <meta-data
+77-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:9-73
+78            android:name="minWaveSDKVersion"
+78-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:20-52
+79            android:value="1" />
+79-->/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/AndroidManifest.xml:11:53-70
+80    </application>
+81
+82</manifest>

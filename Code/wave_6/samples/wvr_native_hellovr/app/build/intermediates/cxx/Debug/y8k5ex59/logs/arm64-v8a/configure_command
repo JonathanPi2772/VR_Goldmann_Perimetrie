@@ -1,0 +1,15 @@
+/Users/jonathanpi27/Library/Android/sdk/ndk/21.4.7075529/ndk-build \
+  NDK_PROJECT_PATH=null \
+  APP_BUILD_SCRIPT=/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Android.mk \
+  NDK_APPLICATION_MK=/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/jni/Application.mk \
+  APP_ABI=arm64-v8a \
+  NDK_ALL_ABIS=arm64-v8a \
+  APP_PLATFORM=android-29 \
+  NDK_OUT=/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/y8k5ex59/obj \
+  NDK_LIBS_OUT=/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/intermediates/cxx/Debug/y8k5ex59/lib \
+  VR_SDK_ROOT=/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/build/wvr_client \
+  NDK_DEBUG=1 \
+  APP_SHORT_COMMANDS=false \
+  LOCAL_SHORT_COMMANDS=false \
+  -B \
+  -n

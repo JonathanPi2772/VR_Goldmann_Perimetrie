@@ -1,0 +1,188 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.htc.vr.samples.wvr_hellovr.app-debug-5:/values_values.arsc.flat",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "1,-1",
+                        "startColumns": "4,-1",
+                        "startOffsets": "97,-1",
+                        "endColumns": "58,-1",
+                        "endOffsets": "151,-1"
+                    },
+                    "to": {
+                        "startLines": "4,5",
+                        "startColumns": "4,4",
+                        "startOffsets": "169,228",
+                        "endColumns": "58,53",
+                        "endOffsets": "223,277"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
+                    },
+                    "to": {
+                        "startLines": "23",
+                        "startColumns": "4",
+                        "startOffsets": "1379",
+                        "endLines": "25",
+                        "endColumns": "12",
+                        "endOffsets": "1472"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/res/values/values.xml",
+                    "from": {
+                        "startLines": "-1,-1,-1",
+                        "startColumns": "-1,-1,-1",
+                        "startOffsets": "-1,-1,-1"
+                    },
+                    "to": {
+                        "startLines": "6,7,26",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "282,417,1477",
+                        "endLines": "6,22,34",
+                        "endColumns": "134,8,8",
+                        "endOffsets": "412,1374,2018"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/dimens.xml",
+                    "from": {
+                        "startLines": "-1,-1",
+                        "startColumns": "-1,-1",
+                        "startOffsets": "-1,-1"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,113",
+                        "endColumns": "57,55",
+                        "endOffsets": "108,164"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/values_values.arsc.flat",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "1,2",
+                        "startColumns": "4,4",
+                        "startOffsets": "97,146",
+                        "endColumns": "48,53",
+                        "endOffsets": "141,195"
+                    },
+                    "to": {
+                        "startLines": "4,5",
+                        "startColumns": "4,4",
+                        "startOffsets": "169,218",
+                        "endColumns": "48,53",
+                        "endOffsets": "213,267"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "54",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "182"
+                    },
+                    "to": {
+                        "startLines": "23",
+                        "startColumns": "4",
+                        "startOffsets": "1369",
+                        "endLines": "25",
+                        "endColumns": "12",
+                        "endOffsets": "1462"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/.gradle/caches/8.13/transforms/666a9f3641f39f9104d7acac132e611f/transformed/wvr_client-6.2.0/res/values/values.xml",
+                    "from": {
+                        "startLines": "2,3,19",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,190,1152",
+                        "endLines": "2,18,27",
+                        "endColumns": "134,8,8",
+                        "endOffsets": "185,1147,1693"
+                    },
+                    "to": {
+                        "startLines": "6,7,26",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "272,407,1467",
+                        "endLines": "6,22,34",
+                        "endColumns": "134,8,8",
+                        "endOffsets": "402,1364,2008"
+                    }
+                },
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values/dimens.xml",
+                    "from": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "88,146",
+                        "endColumns": "57,55",
+                        "endOffsets": "141,197"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,113",
+                        "endColumns": "57,55",
+                        "endOffsets": "108,164"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/values-v21_values-v21.arsc.flat",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values-v21/styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "3",
+                        "endColumns": "12",
+                        "endOffsets": "129"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/jonathanpi27/.gradle/daemon/8.13/com.htc.vr.samples.wvr_hellovr.app-debug-5:/values-w820dp-v13_values-w820dp-v13.arsc.flat",
+            "map": [
+                {
+                    "source": "/Users/jonathanpi27/Nextcloud/PycharmProjects/Perimetrie/Code/wave_6/samples/wvr_native_hellovr/app/src/main/res/values-w820dp/dimens.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "4",
+                        "startOffsets": "291",
+                        "endColumns": "57",
+                        "endOffsets": "344"
+                    },
+                    "to": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "57",
+                        "endOffsets": "108"
+                    }
+                }
+            ]
+        }
+    ]
+}
